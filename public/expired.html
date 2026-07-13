@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Expired</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        /* Container for Content */
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 90%; /* Default width for smaller screens */
+            max-width: 600px; /* Max width for larger screens */
+            margin: 20px;
+        }
+
+        /* Heading Styles */
+        h1 {
+            color: #e74c3c;
+            font-size: 24px; /* Adjust font size for responsiveness */
+            margin-top: 20px;
+        }
+
+        /* Paragraph Styles */
+        p {
+            color: #555;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+
+        /* Button Styling */
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+            .btn:hover {
+                background-color: #2980b9;
+            }
+
+        /* Image Styling */
+        .image {
+            width: 120px; /* Set a fixed width for images */
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        /* Responsive Design: Adjust layout for smaller screens */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 22px;
+            }
+
+            p {
+                font-size: 14px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            .image {
+                width: 100px; /* Slightly reduce image size for smaller screens */
+            }
+        }
+
+        /* Mobile and Tablet Adjustments */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            p {
+                font-size: 14px;
+                padding: 0 10px; /* Add padding for small screens */
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            .image {
+                width: 90px; /* Reduce image further for very small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Image Section -->
+        <img src="https://m.indopoly.co.id/asset/images/expired.png" alt="Link Expired" class="image">
+
+        <!-- Message Section -->
+        <h1>Oops! This Link Has Expired</h1>
+        <p>The link you followed is no longer valid. It may have expired or been removed. Please check the URL or contact support if you need further assistance.</p>
+        <!-- <a href="/" class="btn">Return to Home Page</a> -->
+    </div>
+
+</body>
+</html>

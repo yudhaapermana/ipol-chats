@@ -1,0 +1,241 @@
+.occmachine {
+  position: absolute;
+  z-index: 99999;
+}
+
+.speed-on {
+    color: white;
+    font-weight: 500;
+}
+
+.speed-stop {
+    color: #E63757;
+    font-weight: 600;
+}
+
+.form-judul {
+    margin-bottom: .1rem;
+    margin-left: .1rem;
+}
+
+.theme-control-toggle-input-main {
+    display: none;
+}
+
+.echart-weekly-goals-lms1 {
+    height: 15.625rem;
+}
+
+.echart-bandwidth-saved1 {
+    height: 10.3rem;
+    width: 10.3rem;
+}
+
+.oeecw960 {
+    height: 7.3rem;
+    width: 7.3rem;
+}
+
+.oeecw984 {
+    height: 7.3rem;
+    width: 7.3rem;
+}
+
+.oeecw1040 {
+    height: 7.3rem;
+    width: 7.3rem;
+}
+
+.oeecw800i {
+    height: 7.3rem;
+    width: 7.3rem;
+}
+
+.cwsmall {
+    height: 7.3rem;
+    width: 7.3rem;
+}
+
+.start {
+    position: relative;
+    width: 25px;
+    height: 25px;
+    background-color: #00ff00;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #00ff00;
+    animation: start-glow 1s infinite alternate;
+}
+
+@keyframes start-glow {
+    0% {
+        box-shadow: 0 0 10px #00ff00;
+        rotate: 0deg;
+        border-radius: 0%;
+    }
+
+    100% {
+        border-radius: 50%;
+        box-shadow: 0 0 30px #00ff00;
+        rotate: -180deg;
+    }
+}
+
+.stop {
+    position: relative;
+    width: 25px;
+    height: 25px;
+    background-color: #E63757;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #E63757;
+    animation: blue-glow 1s infinite alternate;
+}
+
+@keyframes stop-glow {
+    0% {
+        box-shadow: 0 0 20px #E63757;
+    }
+
+    100% {
+        box-shadow: 0 0 30px #E63757;
+    }
+}
+
+.yellow {
+    position: relative;
+    width: 25px;
+    height: 25px;
+    background-color: #fcdb03;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #fcdb03;
+    animation: blue-glow 1s infinite alternate;
+}
+
+.orange {
+    position: relative;
+    width: 25px;
+    height: 25px;
+    background-color: #ff9f0f;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #ff9f0f;
+    animation: blue-glow 1s infinite alternate;
+}
+
+.blue {
+    position: relative;
+    width: 25px;
+    height: 25px;
+    background-color: #4da6ff;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #4da6ff;
+    animation: blue-glow 2s infinite alternate;
+}
+
+.bgstop {
+    background: rgba(255, 255, 255, 0.1);
+    /*border: 1px solid rgba(230, 0, 0, 0.1);*/
+    background-image: linear-gradient(20deg, rgba(0, 0, 0, 0), rgba(230, 0, 0, 0), rgba(230, 0, 0, 0.2));
+}
+
+.bgstart {
+    background: rgba(255, 255, 255, 0.1);
+    /*border: 1px solid rgba(153, 255, 102, 0.1);*/
+    background-image: linear-gradient(20deg, rgba(0, 0, 0, 0), rgba(153, 255, 102, 0), rgba(153, 255, 102, 0.2));
+}
+
+@keyframes blue-glow {
+    0% {
+        box-shadow: 0 0 10px #fff;
+        border-style: none;
+    }
+
+    50% {
+        box-shadow: 0 0 20px #fff;
+        border-style: solid;
+        border-width: 2px;
+    }
+
+    100% {
+        box-shadow: 0 0 30px #fff;
+        border-style: solid;
+        border-width: 3px;
+        rotate: 180deg;
+    }
+}
+
+.bg1 {
+    background: linear-gradient(to bottom, rgba(119, 136, 153, 0) 75%, rgba(119, 136, 153, 0.1) 25%);
+}
+
+.bgu {
+    background: linear-gradient(to bottom, rgba(119, 136, 153, 0.5) 75%, rgba(119, 136, 153, 0.5) 25%);
+}
+
+.blink_me {
+    animation: blinker 2s linear infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}
+
+.showDisR {
+    background-color: #E63757;
+    border-width: 10px;
+    border-color: #ffad33;
+}
+
+.showDisY {
+    background-color: #ffad33;
+    border-width: 10px;
+    border-color: #E63757;
+}
+
+.bgHeader {
+    --overlay-color-1: rgb(0 0 0);
+    --overlay-color-2: rgb(44 123 229);
+    --anim-duration: 8s;
+    opacity: 0.5;
+    background: none;
+}
+
+.bgHeader:after,
+.bgHeader:before {
+    content: '';
+    display: block;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.bgHeader:before {
+    background: linear-gradient(135deg, var(--overlay-color-2) 0%, var(--overlay-color-1) 100%);
+    animation: OpacityAnim var(--anim-duration) ease-in-out 0s infinite alternate;
+}
+
+.bgHeader:after {
+    background: linear-gradient(135deg, var(--overlay-color-1) 0%, var(--overlay-color-2) 100%);
+    animation: OpacityAnim var(--anim-duration) ease-in-out calc(-1 * var(--anim-duration)) infinite alternate;
+}
+
+@keyframes OpacityAnim {
+    0% {
+        opacity: 1.0
+    }
+
+    100% {
+        opacity: 0.0
+    }
+}
+
+.blink_mine {
+    animation: blinker 3s linear infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}

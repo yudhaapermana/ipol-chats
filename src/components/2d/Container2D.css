@@ -1,0 +1,6 @@
+.container-2d {
+    position: relative; /* Penting agar item absolut di dalamnya bisa ditempatkan relatif terhadapnya */
+    border: 2px solid #555;
+    background-color: #f0f0f0; /* Fallback warna jika gambar tidak ada */
+    overflow: hidden; /* Pastikan item tidak terlihat di luar batas kontainer */
+}

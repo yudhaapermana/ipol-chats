@@ -1,0 +1,37 @@
+.float-right {
+    float: right !important;
+}
+
+.txtBil {
+    text-align: right !important;
+}
+
+.modal-footer {
+    display: block !important;
+}
+
+.fa,
+.far,
+.fas {
+    font-family: FontAwesome !important;
+}
+
+/* width */
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #232e3c;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

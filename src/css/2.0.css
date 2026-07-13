@@ -1,0 +1,362 @@
+/* =========================================
+   1. LAYOUT STRUCTURE
+   ========================================= */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+.main-wrapper {
+  /* padding-left: 50px; */
+  width: 100%;
+  transition: none;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+/* =========================================
+   2. SIDEBAR SYSTEM
+   ========================================= */
+.sidebar-container {
+  font-family: var(--falcon-font-sans-serif);
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  z-index: 1030;
+  transition: transform 0.5s ease, width 0.5s ease;
+}
+
+.sidebar-mini {
+  width: 50px;
+}
+
+.sidebar-expanded {
+  width: 323px;
+}
+
+.sidebar-overlay {
+  z-index: 1025;
+}
+
+.secondary-sidebar-overlay {
+  position: fixed;
+  top: 0;
+  height: 100vh;
+  width: 360px;
+  z-index: 1025;
+  left: 0;
+  transform: translateX(-100%);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.5s ease;
+}
+
+.secondary-sidebar-overlay.show-standby {
+  visibility: visible;
+  opacity: 0;
+  transform: translateX(0);
+  left: 0;
+}
+
+.secondary-sidebar-overlay.show-active {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(0);
+  left: 323px;
+}
+
+/* =========================================
+   3. NAVIGATION & SEARCH
+   ========================================= */
+.search-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 49px;
+  z-index: 1040;
+  transition: all 0.3s ease;
+}
+
+.search-overlay.active {
+  animation: slideDown 0.2s ease-out;
+}
+
+.nav-link-custom {
+  transition: background 0.2s;
+}
+
+.nav-link-custom:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-side-custom {
+  padding: 0 18px !important;
+}
+
+.custom-nav-item {
+  color: var(--falcon-primary) !important;
+}
+
+[data-bs-theme='dark'] .custom-nav-item {
+  color: #b9deff !important;
+}
+
+.custom-nav-item:hover,
+[data-bs-theme='dark'] .custom-nav-item:hover {
+  background-color: var(--falcon-primary);
+  color: white !important;
+}
+
+/* Custom Nav Tabs */
+.custom-nav-tabs .nav-link {
+  font-family: var(--falcon-font-sans-serif);
+  color: white !important;
+  border: none !important;
+  border-radius: var(--falcon-border-radius-pill) !important;
+  padding: 6px !important;
+  transition: all 0.3s ease;
+  background: transparent;
+}
+
+.custom-nav-tabs .nav-link.active {
+  background-color: var(--falcon-primary) !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  font-weight: 600;
+}
+
+.custom-nav-tabs .nav-link:hover:not(.active) {
+  color: white !important;
+  background-color: var(--falcon-primary);
+}
+
+/* =========================================
+   4. COMPONENTS & UTILITIES
+   ========================================= */
+.menu-text {
+  white-space: nowrap;
+}
+
+.hover-bg-light:hover {
+  background-color: var(--falcon-primary);
+  color: var(--falcon-white);
+  transition: 0.2s;
+}
+
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+/* Theme Switch */
+.theme-switch-container {
+  width: 60px;
+  height: 32px;
+  background-color: #f9fafb !important;
+  transition: background-color 0.3s ease;
+}
+
+.theme-switch-container.active-dark {
+  background-color: #333 !important;
+}
+
+.switch-circle {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.active-dark .switch-circle {
+  transform: translateX(20px);
+}
+
+/* Helpers */
+.h-fit {
+  height: fit-content;
+}
+.w-fit {
+  width: fit-content;
+}
+
+.custom-badge {
+  min-height: 20px;
+}
+
+.custom-btn-table {
+  width: 20px;
+  height: 20px;
+}
+
+.notification-number {
+  right: -0.5rem;
+  top: -0.5rem;
+  min-height: 1rem;
+  min-width: 1rem;
+  font-size: 0.7rem;
+  line-height: 0;
+}
+
+/* Misc */
+.custom-login {
+  background-image: url(../assets/img/background-login.svg);
+  background-size: cover;
+  background-position: center;
+}
+
+.custom-carousel-image {
+  height: 1000px !important;
+  object-fit: cover !important;
+}
+
+.custom-card-notification {
+  width: 100vw;
+}
+
+.custom-card-body-notification {
+  overflow-y: auto;
+}
+
+.is-menu-active {
+  background-color: var(--falcon-primary) !important;
+  color: white !important;
+  width: 26px;
+  height: 26px;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text-normal {
+  white-space: normal;
+}
+
+.form-check-input {
+  margin-top: 0.4rem !important;
+}
+
+[data-bs-theme='dark'] .custom-link {
+  color: #b9deff !important;
+}
+
+.custom-inbox:hover {
+  background-color: var(--falcon-gray-200);
+}
+
+.custom-scroll {
+  scrollbar-width: none !important;
+}
+
+aside.EmojiPickerReact {
+  --epr-emoji-size: 25px;
+  --epr-category-navigation-button-size: 20px;
+  --epr-category-label-height: 25px;    
+}
+
+.epr_-rk4ix5 {
+  font-size: 12px !important;
+}
+
+/* =========================================
+   5. ANIMATIONS
+   ========================================= */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================
+   6. MEDIA QUERIES
+   ========================================= */
+
+@media (max-width: 576px) {
+  .search-overlay.active ~ .navbar-nav {
+    display: none !important;
+  }
+
+  .custom-card-notification {
+    right: -8.2rem !important;
+  }
+
+  .custom-card-body-notification {
+    height: 21rem;
+  }
+}
+
+/* Tablet & Mobile Layout */
+@media (max-width: 991.98px) {
+  .main-wrapper {
+    padding-left: 0 !important;
+  }
+
+  .sidebar-mini {
+    transform: translateX(-100%);
+    width: 323px;
+  }
+
+  .sidebar-expanded {
+    transform: translateX(0);
+    width: 323px !important;
+    z-index: 1045;
+  }
+
+  .secondary-sidebar-overlay {
+    top: 0;
+    left: 0 !important;
+    width: 323px !important;
+    height: 100vh;
+    z-index: 1046;
+    transform: translateX(-100%);
+    transition: all 0.5s ease;
+  }
+
+  .secondary-sidebar-overlay.show-standby {
+    visibility: visible;
+    opacity: 0;
+    transform: translateX(-100%);
+    left: 0;
+  }
+
+  .secondary-sidebar-overlay.show-active {
+    transform: translateX(0);
+  }
+
+  .custom-card-notification {
+    max-width: 20rem;
+  }
+
+  .custom-card-body-notification {
+    height: 27rem;
+  }
+}
+
+/* Desktop Notifications */
+@media (min-width: 992px) {
+  .custom-card-notification {
+    max-width: 25rem;
+  }
+  .custom-card-body-notification {
+    height: 28.45rem;
+  }
+  .custom-profile {
+    max-width: 23%;
+  }
+}
+
+@media (min-width: 1200px) {
+  .custom-card-notification {
+    max-width: 30rem;
+  }
+
+  .custom-card-body-notification {
+    height: 28.45rem;
+  }
+}

@@ -1,0 +1,63 @@
+import { Suspense, useState } from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
+import { OrbitControls, TransformControls, ContactShadows, useGLTF, useCursor, Box, Environment } from '@react-three/drei';
+import { proxy, useSnapshot } from 'valtio';
+import { MeshBasicMaterial } from 'three';
+
+// Reactive state model, using Valtio ...
+const modes = ['translate', 'rotate', 'scale'];
+const state = proxy({ current: null, mode: 0 });
+
+function BoxItem({ position, size, color }) {
+  return (
+    <Box position={position} args={size}>
+      <meshStandardMaterial color={color} />
+    </Box>
+  );
+}
+
+// const containerItems = [
+//   { color: `hsl(${Math.random() * 360}, 70%, 50%)`, length: 1200, width: 1000, height: 820, x: 1300, y: 566, z: 0 },
+//   { color: `hsl(${Math.random() * 360}, 70%, 50%)`, length: 1200, width: 1000, height: 2280, x: 1300, y: 1766, z: 0 }
+// ];
+
+function FortyFootContainer(props) {
+  const { scene } = useGLTF('/40ft.glb');
+  return <primitive object={scene} {...props} />;
+}
+
+const Container40ft = ({ containerItems, height }) => {
+  const ActualSize = { PANJANG: 12000, LEBAR: 2340, TINGGI: 2280 };
+  const KonversiSize = { PANJANG: 1194.981079, LEBAR: 275.002938, TINGGI: 290.002543 };
+  const ResultSize = { PANJANG: ActualSize.PANJANG / KonversiSize.PANJANG, LEBAR: ActualSize.LEBAR / KonversiSize.LEBAR, TINGGI: ActualSize.TINGGI / KonversiSize.TINGGI };
+  return (
+    <Canvas camera={{ position: [5, 10, 50] }} style={{ height: height }}>
+      <Suspense fallback={null}>
+        <FortyFootContainer position={[50, -15, 0]} scale={[ResultSize.PANJANG, ResultSize.LEBAR, ResultSize.TINGGI]} />
+        {containerItems.map((item, index) => {
+          const calcX = parseFloat(item.x / 129) - parseFloat((2340 - item.width) / 234) + parseFloat(item.x / 2340);
+          const calcY = parseFloat((item.y - 5) / 123) + parseFloat(item.length / 208.695652) - parseFloat(9 - parseFloat(item.length / 12000));
+          const calcZ = parseFloat(item.z / 104.5) - parseFloat((2280 - item.height) / 203) + parseFloat(item.z / 2280) - 2.25;
+
+          const calcWdth = parseFloat(item.width / 123.1578947368421);
+          const calcLngth = parseFloat(item.length / 103) - 2;
+
+          const position = [calcY, calcZ, calcX];
+          const size = [calcLngth, item.height / 100, calcWdth];
+
+          return (
+            <BoxItem
+              key={index}
+              position={position}
+              size={size}
+              color={item.color} // Warna acak untuk setiap item
+            />
+          );
+        })}
+        <OrbitControls />
+        <Environment preset="city" />
+      </Suspense>
+    </Canvas>
+  );
+};
+export default Container40ft;

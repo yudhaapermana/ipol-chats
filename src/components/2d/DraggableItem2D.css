@@ -1,0 +1,17 @@
+.draggable-item {
+    position: absolute;
+    border: 1px solid #333;
+    cursor: grab; /* Menunjukkan bahwa item bisa digeser */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8em;
+    color: #333;
+    text-align: center;
+    user-select: none; /* Mencegah teks terpilih saat drag */
+    box-sizing: border-box; /* Pastikan padding/border tidak menambah ukuran */
+}
+
+.draggable-item:active {
+    cursor: grabbing; /* Mengubah kursor saat sedang digeser */
+}

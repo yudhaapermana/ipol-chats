@@ -1,0 +1,126 @@
+import Divider from 'components/common/Divider';
+import PropTypes from 'prop-types';
+import React, { useState, useEffect } from 'react';
+import { Button, Col, Form, Row } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
+import * as ISI from 'script/ISI.js?2';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import SocialAuthButtons from './SocialAuthButtons';
+
+const LoginFormPartner = ({ hasLabel, layout }) => {
+  const navigate = useNavigate();
+  const URL = process.env.REACT_APP_URL_API;
+
+  // State
+  const [formData, setFormData] = useState({
+    UserId: '',
+    Password: '',
+    remember: false
+  });
+
+  // Handler
+  const handleSubmit = async e => {
+    e.preventDefault();
+    //alert(URL);
+    try {
+      let temp = await axios({
+        url: `${URL}api/Utility/GetLoginApp`,
+        method: 'POST',
+        data: formData,
+        contentType: 'application/json; charset=utf-8'
+      });
+
+      // console.table(temp.data);
+      // console.log(temp.data.Msg);
+      if (temp.data.Msg == '') {
+        // alert('masuk login');
+        localStorage.setItem('partnerData', JSON.stringify(temp.data));
+        navigate('/imes/ims003_logSheetCW500');
+      } else {
+        console.log('masuk error');
+        ISI.PopAlertFalcon('Warning', '', temp.data.Msg, '');
+        console.log(`Alert Baru`);
+        //ISI.confAlert("Warning","test"+temp.data.Msg);
+      }
+      // console.log('TEMP.DATA : ');
+      // console.log(temp.data);
+      // setUser(temp.data);
+      // console.log(userData);
+    } catch (err) {
+      ISI.PopAlertFalcon('error', 'error', err, '');
+
+      //ISI.confAlert("Danger","test"+err);
+    }
+  };
+
+  const handleFieldChange = e => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  return (
+    <Form>
+      <Form.Group className="mb-3">
+        {hasLabel && <Form.Label>User ID</Form.Label>}
+        <Form.Control placeholder={!hasLabel ? 'User ID' : ''} value={formData.UserId} name="UserId" onChange={handleFieldChange} type="text" autoFocus />
+      </Form.Group>
+
+      <Form.Group className="mb-3">
+        {hasLabel && <Form.Label>Password</Form.Label>}
+        <Form.Control placeholder={!hasLabel ? 'Password' : ''} value={formData.Password} name="Password" onChange={handleFieldChange} type="password" />
+      </Form.Group>
+
+      <Row className="justify-content-between align-items-center">
+        <Col xs="auto">
+          {/* <Form.Check type="checkbox" id="rememberMe" className="mb-0">
+            <Form.Check.Input
+              type="checkbox"
+              name="remember"
+              checked={formData.remember}
+              onChange={e =>
+                setFormData({
+                  ...formData,
+                  remember: e.target.checked
+                })
+              }
+            />
+            <Form.Check.Label className="mb-0 text-700">
+              Remember me
+            </Form.Check.Label>
+          </Form.Check> */}
+        </Col>
+
+        <Col xs="auto">
+          <Link className="fs-10 mb-0" to={`/authentication/${layout}/forgot-password`}>
+            Forgot Password?
+          </Link>
+        </Col>
+      </Row>
+
+      <Form.Group>
+        <Button type="submit" color="primary" className="mt-3 w-100" disabled={!formData.UserId || !formData.Password} onClick={handleSubmit}>
+          Log in
+        </Button>
+      </Form.Group>
+
+      {/* <Divider className="mt-4">or log in with</Divider>
+
+      <SocialAuthButtons /> */}
+    </Form>
+  );
+};
+
+LoginFormPartner.propTypes = {
+  layout: PropTypes.string,
+  hasLabel: PropTypes.bool
+};
+
+LoginFormPartner.defaultProps = {
+  layout: 'simple',
+  hasLabel: false
+};
+
+export default LoginFormPartner;
