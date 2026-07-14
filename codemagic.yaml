@@ -7,7 +7,8 @@ workflows:
       app_store_connect: IpolChatKey
     environment:
       groups:
-        - env_production  
+        - env_production
+        - code_signing  
       vars:
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
