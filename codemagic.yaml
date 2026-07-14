@@ -7,14 +7,12 @@ workflows:
       app_store_connect: ipolChatKey
     environment:
       groups:
-        - env_production 
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.ipol.chatApp 
+        - env_production  
       vars:
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
         APP_STORE_APP_ID: 6790330188
+        BUNDLE_ID: "com.ipol.chatApp"
       node: 24.18.0
       xcode: latest
       cocoapods: default
