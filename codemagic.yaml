@@ -1,0 +1,80 @@
+workflows:
+  ios-capacitor-workflow:
+    name: Ipol Chat iOS Workflow
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: ipolChatKey
+    environment:
+      groups:
+        - env_production 
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.ipol.chatApp 
+      vars:
+        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+        APP_STORE_APP_ID: 6790330188
+      node: 24.18.0
+      xcode: latest
+      cocoapods: default
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+    scripts:
+      - name: Install dependencies
+        script: npm install
+
+      - name: Generate .env file
+        script: |
+          echo "REACT_APP_URL_API=$REACT_APP_URL_API" >> .env
+          echo "ESLINT_NO_DEV_ERRORS=$ESLINT_NO_DEV_ERRORS" >> .env
+          echo "PUBLIC_URL=$PUBLIC_URL" >> .env
+          echo "SKIP_PREFLIGHT_CHECK=$SKIP_PREFLIGHT_CHECK" >> .env
+          echo "REACT_APP_TINYMCE_APIKEY=$REACT_APP_TINYMCE_APIKEY" >> .env
+          echo "REACT_APP_GOOGLE_API_KEY=$REACT_APP_GOOGLE_API_KEY" >> .env
+          echo "REACT_APP_URL_API_LOCAL=$REACT_APP_URL_API_LOCAL" >> .env
+          echo "REACT_APP_URL_IPOL=$REACT_APP_URL_IPOL" >> .env
+          echo "REACT_APP_URL_MOBILE=$REACT_APP_URL_MOBILE" >> .env
+          echo "REACT_APP_URL_ERP=$REACT_APP_URL_ERP" >> .env
+          echo "GENERATE_SOURCEMAP=$GENERATE_SOURCEMAP" >> .env
+          echo "DISABLE_ESLINT_PLUGIN=$DISABLE_ESLINT_PLUGIN" >> .env
+
+
+      - name: Build web assets
+        script: |
+          CI=false npm run build
+
+      - name: Sync Capacitor iOS
+        script: npx cap sync ios
+
+      - name: Install CocoaPods
+        script: |
+          cd ios/App && pod install
+
+      - name: Set up code signing
+        script: xcode-project use-profiles
+
+      - name: Increment build number
+        script: |
+          cd $CM_BUILD_DIR/ios/App
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APP_ID")
+          agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
+
+      - name: Build ipa for distribution
+        script: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_app_store: false
