@@ -169,11 +169,11 @@ const Chat = () => {
       registerPushNotifications();
     }
 
-    return () => {
-      if (Capacitor.isNativePlatform()) {
-        PushNotifications.removeAllListeners();
-      }
-    };
+    // return () => {
+    //   if (Capacitor.isNativePlatform()) {
+    //     PushNotifications.removeAllListeners();
+    //   }
+    // };
   }, []);
 
   const registerPushNotifications = async () => {
@@ -206,6 +206,7 @@ const Chat = () => {
 
     PushNotifications.addListener('registrationError', error => {
       console.error('Gagal registrasi notif:', error);
+      alert('Error Registrasi: ' + JSON.stringify(error));
     });
 
     PushNotifications.addListener('pushNotificationActionPerformed', async action => {
