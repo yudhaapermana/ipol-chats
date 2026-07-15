@@ -17,8 +17,8 @@ import Linkify from 'react-linkify';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
-import { formatText } from 'helpers/formatText'
-import { FCM } from '@capacitor-community/fcm'
+import { formatText } from 'helpers/formatText';
+import { FCM } from '@capacitor-community/fcm';
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -56,8 +56,14 @@ const Chat = () => {
   const [previewFile, setPreviewFile] = useState(null);
   const [isDeleteRoom, setIsDeleteRoom] = useState(false);
   const [isIconTrash, setIsIconTrash] = useState(false);
-  const [deleteRoomId, setDeleteRoomId] = useState("");
+  const [deleteRoomId, setDeleteRoomId] = useState('');
   const [previewIndex, setPreviewIndex] = useState(null);
+  const [debugLogs, setDebugLogs] = useState([]);
+  const [isDebug, setIsDebug] = useState(false);
+  
+  const addLog = msg => {
+    setDebugLogs(prev => [...prev, msg]);
+  };
 
   const CheckDev = useIsMobile();
 
@@ -97,8 +103,7 @@ const Chat = () => {
 
     hubProxy.on('receiveMessage', msg => {
       const targetRoom = Obj?.ListRoom?.find(r => r.RoomId?.toString() === msg.RoomId?.toString());
-      if (msg.RoomId?.toString() === activeRoomId?.toString() && targetRoom?.IsActive == "1") {
-
+      if (msg.RoomId?.toString() === activeRoomId?.toString() && targetRoom?.IsActive == '1') {
         if (msg.Tkn !== lgdata.Keys) {
           setMessages(prev => {
             const isExist = prev.find(item => item.ChatId === msg.ChatId);
@@ -106,10 +111,10 @@ const Chat = () => {
             return [...prev, msg];
           });
 
-          if (chat?.IsActive == "1") {
+          if (chat?.IsActive == '1') {
             ResetUnread(activeRoomId);
             const updateRoom = Obj.ListRoom.map(r => {
-              if (r.RoomId === activeRoomId && r.IsActive == "1") {
+              if (r.RoomId === activeRoomId && r.IsActive == '1') {
                 return { ...r, LastMsg: msg.Text, LastMsgAt: msg.SentAt, UnreadCount: 0 };
               }
               return r;
@@ -120,10 +125,10 @@ const Chat = () => {
       }
     });
 
-    hubProxy.on('updateInbox', (msg) => {
+    hubProxy.on('updateInbox', msg => {
       const targetRoom = Obj?.ListRoom?.find(r => r.RoomId?.toString() === msg.RoomId?.toString());
 
-      if ((targetRoom && targetRoom.IsActive == "0")) {
+      if (targetRoom && targetRoom.IsActive == '0') {
         return;
       }
 
@@ -177,36 +182,42 @@ const Chat = () => {
   }, []);
 
   const registerPushNotifications = async () => {
+    addLog('1. Memulai cek izin...');
     let permStatus = await PushNotifications.checkPermissions();
 
     if (permStatus.receive === 'prompt') {
+      addLog('2. Meminta izin pengguna...');
       permStatus = await PushNotifications.requestPermissions();
     }
 
     if (permStatus.receive !== 'granted') {
+      addLog('X. Izin ditolak pengguna.');
       console.log('Izin push notification ditolak.');
       return;
     }
 
+    addLog('3. Izin diberikan. Memanggil APNs register...');
     await PushNotifications.register();
+    addLog('4. Perintah APNs register selesai dieksekusi.');
 
-    PushNotifications.addListener('registration', async (apnsToken) => {
+    PushNotifications.addListener('registration', async apnsToken => {
       console.log('APNs Token:', apnsToken.value);
-      alert('APNs Token diterima: ' + apnsToken.value);
+      addLog('5. Sukses dapat APNs: ' + apnsToken.value.substring(0, 10) + '...');
       try {
+        addLog('6. Meminta FCM Token...');
         const result = await FCM.getToken();
         console.log('FCM Token Anda:', result.token);
-        alert('FCM Token: ' + result.token);
+        addLog('7. FCM didapat: ' + result.token.substring(0, 10) + '...');
         saveToken(result.token);
       } catch (err) {
         console.error('Gagal ambil FCM token:', err);
-        alert('Error FCM getToken: ' + JSON.stringify(err));
+        addLog('X. Error ambil FCM: ' + err.message);
       }
     });
 
     PushNotifications.addListener('registrationError', error => {
       console.error('Gagal registrasi notif:', error);
-      alert('Error Registrasi: ' + JSON.stringify(error));
+      addLog('X. APNs Error: ' + JSON.stringify(error));
     });
 
     PushNotifications.addListener('pushNotificationActionPerformed', async action => {
@@ -244,7 +255,7 @@ const Chat = () => {
       handleOpenChat(1, pendingRoomId.current);
       pendingRoomId.current = null;
     }
-  }, [Obj.ListRoom])
+  }, [Obj.ListRoom]);
 
   const saveToken = async fcmToken => {
     const payload = {
@@ -260,7 +271,7 @@ const Chat = () => {
         data: payload,
         contentType: 'application/json; charset=utf-8',
         headers: {
-          Keys: lgdata.UserTkn,
+          Keys: lgdata.UserTkn
         }
       })
         .then(response => {
@@ -328,7 +339,7 @@ const Chat = () => {
         method: 'GET',
         contentType: 'application/json; charset=utf-8',
         headers: {
-          Keys: lgdata?.UserTkn,
+          Keys: lgdata?.UserTkn
         }
       })
         .then(response => {
@@ -350,7 +361,7 @@ const Chat = () => {
         method: 'GET',
         contentType: 'application/json; charset=utf-8',
         headers: {
-          Keys: lgdata?.UserTkn,
+          Keys: lgdata?.UserTkn
         }
       })
         .then(response => {
@@ -586,7 +597,7 @@ const Chat = () => {
           Keys: lgdata.UserTkn
         }
       })
-        .then(response => { })
+        .then(response => {})
         .catch(err => {
           ISI.PopAlertFalcon('error', 'error', err.response.data.Message, '');
         });
@@ -623,7 +634,7 @@ const Chat = () => {
   const availableAddMember = useMemo(() => {
     const existingMemberTkns = new Set(chat?.Members?.map(m => m.NIK));
     return filteredUser?.filter(user => !existingMemberTkns.has(user.NIK));
-  }, [filteredUser])
+  }, [filteredUser]);
 
   const filteredInbox = useMemo(() => {
     const lowKeyword = keywordIbx?.toLowerCase();
@@ -653,9 +664,7 @@ const Chat = () => {
         const urlObj = new URL(href);
         const appid = urlObj.searchParams.get('appid');
 
-        finalHref = appid
-          ? `${IPOL_URL}login/LoginKeyErp/${lgdata.Keys}/${lgdata.IP}/${appid}`
-          : `${href}${href.includes('?') ? '&' : '?'}key=${lgdata.Keys}`;
+        finalHref = appid ? `${IPOL_URL}login/LoginKeyErp/${lgdata.Keys}/${lgdata.IP}/${appid}` : `${href}${href.includes('?') ? '&' : '?'}key=${lgdata.Keys}`;
       } catch (e) {
         finalHref = href;
       }
@@ -673,7 +682,7 @@ const Chat = () => {
       <a href={finalHref} key={key} target="_blank" rel="noopener noreferrer" className="text-decoration-underline">
         {text}
       </a>
-    )
+    );
   };
 
   const playNotificationSound = () => {
@@ -731,7 +740,6 @@ const Chat = () => {
         await handleSendMessage(temp.data, file);
 
         e.target.value = null;
-
       } else {
         ISI.PopAlertFalcon('Warning', 'Warning', temp.data.Msg, '');
         e.target.value = null;
@@ -750,21 +758,11 @@ const Chat = () => {
         Obj.ListMember = Obj?.ListMember?.filter(member => member.UserId !== data.UserId);
       }
 
-      setLsUser(prev =>
-        prev.map(user =>
-          user.UserId === data.UserId ? { ...user, isAddGroup: 0 } : user
-        )
-      );
-
+      setLsUser(prev => prev.map(user => (user.UserId === data.UserId ? { ...user, isAddGroup: 0 } : user)));
     } else {
-
       Obj?.ListMember?.push(data);
 
-      setLsUser(prev =>
-        prev.map(user =>
-          user.UserId === data.UserId ? { ...user, isAddGroup: 1 } : user
-        )
-      );
+      setLsUser(prev => prev.map(user => (user.UserId === data.UserId ? { ...user, isAddGroup: 1 } : user)));
     }
   };
 
@@ -778,7 +776,7 @@ const Chat = () => {
     setObj({
       ...Obj,
       ListMember: []
-    })
+    });
 
     setLsUser(prev => prev.map(user => ({ ...user, isAddGroup: 0 })));
   };
@@ -794,9 +792,9 @@ const Chat = () => {
         [id]: val
       }
     });
-  }
+  };
 
-  const handleNewGroup = async (file) => {
+  const handleNewGroup = async file => {
     const roomData = {
       Type: 'G',
       Title: Obj?.Data?.Title,
@@ -832,7 +830,7 @@ const Chat = () => {
           DoIsiData(response.data);
           setIsGroup(false);
           setIsProfile(false);
-          setKeyword("");
+          setKeyword('');
 
           handleOpenChat(1, response.data?.Data?.RoomId);
         })
@@ -842,14 +840,14 @@ const Chat = () => {
     } catch (err) {
       ISI.PopAlertFalcon('error', 'error', err.response.data.Message, '');
     }
-  }
+  };
 
-  const getCustomAvatar = (fullName) => {
+  const getCustomAvatar = fullName => {
     if (!fullName) return '';
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=random&color=fff&rounded=true&bold=true`;
   };
 
-  const handleDeleteRoom = async (roomId) => {
+  const handleDeleteRoom = async roomId => {
     const payload = {
       ProsesId: 'DeleteRoom',
       Data: { RoomId: roomId },
@@ -870,7 +868,7 @@ const Chat = () => {
           const result = response.data;
           setIsDeleteRoom(false);
           setIsIconTrash(false);
-          setDeleteRoomId("");
+          setDeleteRoomId('');
           DoIsiData(result);
         })
         .catch(err => {
@@ -879,9 +877,9 @@ const Chat = () => {
     } catch (err) {
       ISI.PopAlertFalcon('error', 'error', err.response.data.Message, '');
     }
-  }
+  };
 
-  const handleDeleteChat = async (roomId) => {
+  const handleDeleteChat = async roomId => {
     const payload = {
       ProsesId: 'DeleteChat',
       Data: { RoomId: roomId },
@@ -909,7 +907,7 @@ const Chat = () => {
     } catch (err) {
       ISI.PopAlertFalcon('error', 'error', err.response.data.Message, '');
     }
-  }
+  };
 
   const handleAddMember = async () => {
     const upobj = {
@@ -935,7 +933,7 @@ const Chat = () => {
           resetAddGroup();
           setKeyword('');
 
-          // setIsProfile(false);        
+          // setIsProfile(false);
         })
         .catch(err => {
           ISI.PopAlertFalcon('error', 'error', err.response.data.Message, '');
@@ -943,9 +941,9 @@ const Chat = () => {
     } catch (err) {
       ISI.PopAlertFalcon('error', 'error', err.response.data.Message, '');
     }
-  }
+  };
 
-  const handleLeaveGroup = async (roomId) => {
+  const handleLeaveGroup = async roomId => {
     const payload = {
       ProsesId: 'LeaveGroup',
       Data: { RoomId: roomId, Tkn: lgdata?.Keys },
@@ -965,7 +963,7 @@ const Chat = () => {
         .then(response => {
           const result = response.data;
           setisLeaveGroup(false);
-          setActiveRoomId("");
+          setActiveRoomId('');
           setIsProfile(false);
           DoIsiData(result);
         })
@@ -975,9 +973,9 @@ const Chat = () => {
     } catch (err) {
       ISI.PopAlertFalcon('error', 'error', err.response.data.Message, '');
     }
-  }
+  };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = e => {
     const file = e.target.files[0];
     if (file) {
       const localUrl = URL.createObjectURL(file);
@@ -990,8 +988,8 @@ const Chat = () => {
     if (previewFile) {
       if (previewFile?.size > 10000000) {
         ISI.PopAlertFalcon('error', 'error', 'Max Size File Upload 10mb', '');
-        setPreviewFile(null)
-        setPreviewUrl(null)
+        setPreviewFile(null);
+        setPreviewUrl(null);
         return;
       }
 
@@ -1023,29 +1021,28 @@ const Chat = () => {
 
           setPreviewFile(null);
           setPreviewUrl(null);
-          setKeyword("");
-
+          setKeyword('');
         } else {
           ISI.PopAlertFalcon('Warning', 'Warning', temp.data.Msg, '');
-          setPreviewFile(null)
-          setPreviewUrl(null)
+          setPreviewFile(null);
+          setPreviewUrl(null);
         }
       } catch (error) {
         ISI.AlertException(error);
-        setPreviewFile(null)
-        setPreviewUrl(null)
+        setPreviewFile(null);
+        setPreviewUrl(null);
       }
     } else {
       handleNewGroup();
     }
-  }
+  };
 
-  const handleLongPressStart = (roomId) => {
+  const handleLongPressStart = roomId => {
     setIsIconTrash(false);
-    setDeleteRoomId("");
+    setDeleteRoomId('');
     timerRef.current = setTimeout(() => {
       setIsIconTrash(true);
-      setDeleteRoomId(roomId)
+      setDeleteRoomId(roomId);
     }, 500);
   };
 
@@ -1055,19 +1052,19 @@ const Chat = () => {
     }
   };
 
-  const imageMessages = messages?.filter((m) => m.FileType?.startsWith('image/'));
+  const imageMessages = messages?.filter(m => m.FileType?.startsWith('image/'));
 
-  const imageDocuments = messages?.filter((m) => (m.FileUrl && !m.FileType?.startsWith('image/')));
+  const imageDocuments = messages?.filter(m => m.FileUrl && !m.FileType?.startsWith('image/'));
 
-  const openPreview = (chatId) => {
-    const idx = imageMessages.findIndex((m) => m.ChatId === chatId);
+  const openPreview = chatId => {
+    const idx = imageMessages.findIndex(m => m.ChatId === chatId);
     if (idx !== -1) setPreviewIndex(idx);
   };
 
   function CustomToggle({ children, eventKey }) {
-    const decoratedOnClick = useAccordionButton(eventKey)
+    const decoratedOnClick = useAccordionButton(eventKey);
     return (
-      <div onClick={decoratedOnClick} className='d-flex align-items-center justify-content-between py-3 cursor-pointer'>
+      <div onClick={decoratedOnClick} className="d-flex align-items-center justify-content-between py-3 cursor-pointer">
         {children}
       </div>
     );
@@ -1133,14 +1130,14 @@ const Chat = () => {
       .replace(/[*_~`]/g, '')
       .replace(/\s+/g, ' ')
       .trim();
-}
+  };
 
   useEffect(() => {
     const backHandler = App.addListener('backButton', () => {
       if (isProfile) {
         setIsProfile(false);
       } else if (activeRoomId) {
-        setActiveRoomId("");
+        setActiveRoomId('');
       } else {
         App.exitApp();
       }
@@ -1151,7 +1148,7 @@ const Chat = () => {
   }, [activeRoomId, isProfile]);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = event => {
       if (emojiRef.current && !emojiRef.current.contains(event.target)) {
         setShowEmoji(false);
       }
@@ -1163,7 +1160,7 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = event => {
       if (attachRef.current && !attachRef.current.contains(event.target)) {
         setIsAttach(false);
       }
@@ -1188,10 +1185,15 @@ const Chat = () => {
                   {/* <div className="border border-300 rounded p-2 py-2 d-flex align-items-center custom-nav-item cursor-pointer">
                     <SvgIcon name={'video'} size={16} />
                   </div> */}
+                  {isIconTrash && (
+                    <div className="border border-300 rounded p-3 py-3 p-md-2 py-md-2 d-flex align-items-center custom-nav-item cursor-pointer" onClick={() => setIsDeleteRoom(!isDeleteRoom)}>
+                      <SvgIcon name={'trash-01'} size={16} />
+                    </div>
+                  )}
                   {
-                    isIconTrash && (
-                      <div className="border border-300 rounded p-3 py-3 p-md-2 py-md-2 d-flex align-items-center custom-nav-item cursor-pointer" onClick={() => setIsDeleteRoom(!isDeleteRoom)}>
-                        <SvgIcon name={'trash-01'} size={16} />
+                    Capacitor.isNativePlatform() && (
+                      <div className="border border-300 rounded p-3 py-3 p-md-2 py-md-2 d-flex align-items-center custom-nav-item cursor-pointer" onClick={() => setIsDebug(true)}>
+                        <SvgIcon name={'zap'} size={16} />
                       </div>
                     )
                   }
@@ -1228,7 +1230,9 @@ const Chat = () => {
               <div id="chat-list" className="d-flex flex-column overflow-y-auto custom-scroll" style={{ height: self == top ? htab - 75 : htabe - 75 }}>
                 {filteredInbox?.map(i => (
                   <div
-                    className={`d-flex justify-content-between position-relative py-3 px-2 border-bottom border-300 custom-inbox cursor-pointer ${i?.RoomId == deleteRoomId && 'bg-400 rounded-3'} ${(i?.RoomId == activeRoomId || i?.RoomId == deleteRoomId) && 'bg-200 rounded-3'}`}
+                    className={`d-flex justify-content-between position-relative py-3 px-2 border-bottom border-300 custom-inbox cursor-pointer ${i?.RoomId == deleteRoomId && 'bg-400 rounded-3'} ${
+                      (i?.RoomId == activeRoomId || i?.RoomId == deleteRoomId) && 'bg-200 rounded-3'
+                    }`}
                     key={i?.RoomId}
                     onClick={() => handleOpenChat(1, i?.RoomId)}
                     onTouchStart={() => handleLongPressStart(i?.RoomId)}
@@ -1265,7 +1269,11 @@ const Chat = () => {
                 <div id="chat" className={`d-flex flex-column ${isProfile && 'd-md-none d-lg-block'}`} style={{ flex: 2 }}>
                   <div id="top" className="d-flex justify-content-between align-items-start p-4" style={{ boxShadow: '0px 4px 4px 0px rgba(205, 205, 205, 0.25)', maxHeight: '90px' }}>
                     <div className="d-flex gap-3 align-items-center cursor-pointer pe-2" onClick={() => setIsProfile(true)}>
-                      <Avatar src={chat?.Image ? chat.Image : chat?.Title == 'System Admin' ? avatarAdmin : getCustomAvatar(chat.Title)} size={`${CheckDev.isMobile ? '2xl' : '3xl'}`} className="h-fit pb-2" />
+                      <Avatar
+                        src={chat?.Image ? chat.Image : chat?.Title == 'System Admin' ? avatarAdmin : getCustomAvatar(chat.Title)}
+                        size={`${CheckDev.isMobile ? '2xl' : '3xl'}`}
+                        className="h-fit pb-2"
+                      />
                       <div className="d-flex flex-column gap-1">
                         <h5 className="fw-bold fs-10 fs-md-9 m-0">{chat?.Title}</h5>
                         <p className="fw-light m-0 fs-11 fs-md-10">{chat?.Dept}</p>
@@ -1277,13 +1285,11 @@ const Chat = () => {
                       </div>
                       {chat?.Title != 'System Admin' && (
                         <>
-                          {
-                            (chat?.Type == 'G' && chat?.IsActive == '1') && (
-                              <div className="border border-300 rounded p-3 py-3 p-md-2 py-md-2 d-flex align-items-center custom-nav-item cursor-pointer" onClick={() => setisLeaveGroup(!isLeaveGroup)}>
-                                <SvgIcon name={'logout-01'} size={16} />
-                              </div>
-                            )
-                          }
+                          {chat?.Type == 'G' && chat?.IsActive == '1' && (
+                            <div className="border border-300 rounded p-3 py-3 p-md-2 py-md-2 d-flex align-items-center custom-nav-item cursor-pointer" onClick={() => setisLeaveGroup(!isLeaveGroup)}>
+                              <SvgIcon name={'logout-01'} size={16} />
+                            </div>
+                          )}
                           {/* <div className="border border-300 rounded p-2 py-2 d-flex align-items-center custom-nav-item cursor-pointer">
                             <SvgIcon name={'video'} size={16} />
                           </div>
@@ -1317,59 +1323,44 @@ const Chat = () => {
                   <div id="center" onScroll={handleScroll} className="d-flex flex-column gap-4 p-4 custom-scroll overflow-y-auto" style={{ flex: 1, height: self == top ? htab - 103 : htabe - 103 }}>
                     {messages?.map(m => (
                       <div key={m.ChatId} className={`d-flex gap-1 ${m?.SenderName == lgdata?.UserName && 'justify-content-end'}`}>
-                        {
-                          (m.SenderName != lgdata?.UserName && chat.Type == 'G') && (
-                            <Avatar src={m?.SenderAvatar ? m?.SenderAvatar : getCustomAvatar(m.SenderName)} size="l" className={'mt-2'} />
-                          )
-                        }
-                        <div className={`d-flex flex-column gap-1 w-fit ${m.SenderName == lgdata?.UserName && 'align-self-end align-items-end'}`} >
-                          <p className={`p-2 rounded-3 w-fit bg-200 fs-10 m-0 d-flex flex-column gap-1 ${m.SenderName != lgdata?.UserName && 'bg-primary-subtle'}`} style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                            {
-                              (m.SenderName != lgdata?.UserName && chat.Type == 'G') && (
-                                <span className='fs-12 fw-medium'>{m.SenderName != lgdata?.UserName && m.SenderName}</span>
-                              )
-                            }
-                            {
-                              m?.FileUrl ? (
-                                <>
-                                  {
-                                    m.FileType?.startsWith('image/') ? (
-                                      <img
-                                        src={m.FileUrl}
-                                        alt={m.FileName}
-                                        className="rounded-2 border cursor-pointer"
-                                        style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'cover' }}
-                                        onClick={() => openPreview(m.ChatId)}
-                                      />
-                                    ) : m.FileType?.startsWith('video/') ? (
-                                      <video
-                                        src={m.FileUrl}
-                                        controls
-                                        className="rounded-2 border"
-                                        style={{ maxWidth: '100%', maxHeight: '200px' }}
-                                      />
-                                    ) : (
-                                      <div className="d-flex align-items-center gap-2 p-1 root-download cursor-pointer">
-                                        <span className="fs-9">📄</span>
-                                        <div className="d-flex flex-column overflow-hidden">
-                                          <a
-                                            rel="noreferrer"
-                                            onClick={() => handleDownload(m.FileUrl, m.FileName)}
-                                            className="fw-medium text-primary text-decoration-underline text-truncate"
-                                            style={{ maxWidth: '180px' }}
-                                          >
-                                            {m.FileName}
-                                          </a>
-                                        </div>
-                                      </div>
-                                    )}
-                                </>
-                              ) : (
-                                <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                                  {formatText(m.Text, componentDecorator)}
-                                </div>
-                              )
-                            }
+                        {m.SenderName != lgdata?.UserName && chat.Type == 'G' && <Avatar src={m?.SenderAvatar ? m?.SenderAvatar : getCustomAvatar(m.SenderName)} size="l" className={'mt-2'} />}
+                        <div className={`d-flex flex-column gap-1 w-fit ${m.SenderName == lgdata?.UserName && 'align-self-end align-items-end'}`}>
+                          <p
+                            className={`p-2 rounded-3 w-fit bg-200 fs-10 m-0 d-flex flex-column gap-1 ${m.SenderName != lgdata?.UserName && 'bg-primary-subtle'}`}
+                            style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                          >
+                            {m.SenderName != lgdata?.UserName && chat.Type == 'G' && <span className="fs-12 fw-medium">{m.SenderName != lgdata?.UserName && m.SenderName}</span>}
+                            {m?.FileUrl ? (
+                              <>
+                                {m.FileType?.startsWith('image/') ? (
+                                  <img
+                                    src={m.FileUrl}
+                                    alt={m.FileName}
+                                    className="rounded-2 border cursor-pointer"
+                                    style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'cover' }}
+                                    onClick={() => openPreview(m.ChatId)}
+                                  />
+                                ) : m.FileType?.startsWith('video/') ? (
+                                  <video src={m.FileUrl} controls className="rounded-2 border" style={{ maxWidth: '100%', maxHeight: '200px' }} />
+                                ) : (
+                                  <div className="d-flex align-items-center gap-2 p-1 root-download cursor-pointer">
+                                    <span className="fs-9">📄</span>
+                                    <div className="d-flex flex-column overflow-hidden">
+                                      <a
+                                        rel="noreferrer"
+                                        onClick={() => handleDownload(m.FileUrl, m.FileName)}
+                                        className="fw-medium text-primary text-decoration-underline text-truncate"
+                                        style={{ maxWidth: '180px' }}
+                                      >
+                                        {m.FileName}
+                                      </a>
+                                    </div>
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{formatText(m.Text, componentDecorator)}</div>
+                            )}
                           </p>
                           <small className="m-0 text-600">{formatChatTime(m.SentAt)}</small>
                         </div>
@@ -1377,7 +1368,7 @@ const Chat = () => {
                     ))}
                     <div ref={endRef}></div>
                   </div>
-                  {(chat?.Title !== 'System Admin' && chat?.IsActive == '1') && (
+                  {chat?.Title !== 'System Admin' && chat?.IsActive == '1' && (
                     <div id="bottom" className="d-flex justify-content-between align-items-end p-3 border-top gap-2" style={{ boxShadow: '0px -4px 4px 0px rgba(205, 205, 205, 0.25)' }}>
                       <div className="d-flex gap-1 position-relative">
                         <input
@@ -1388,10 +1379,33 @@ const Chat = () => {
                           ref={fileInputRef}
                           className="d-none"
                           onChange={e => handleFileChange(e, 'document')}
-                          onClick={(e) => { e.target.value = null; }}
+                          onClick={e => {
+                            e.target.value = null;
+                          }}
                         />
-                        <input type="file" id="file-input-media" accept="image/*,video/*" ref={imageInputRef} className="d-none" onChange={e => handleFileChange(e, 'image')} onClick={(e) => { e.target.value = null; }} />
-                        <input type="file" id="file-input" accept="image/*" ref={cameraInputRef} capture="environment" className="d-none" onChange={e => handleFileChange(e, 'camera')} onClick={(e) => { e.target.value = null; }} />
+                        <input
+                          type="file"
+                          id="file-input-media"
+                          accept="image/*,video/*"
+                          ref={imageInputRef}
+                          className="d-none"
+                          onChange={e => handleFileChange(e, 'image')}
+                          onClick={e => {
+                            e.target.value = null;
+                          }}
+                        />
+                        <input
+                          type="file"
+                          id="file-input"
+                          accept="image/*"
+                          ref={cameraInputRef}
+                          capture="environment"
+                          className="d-none"
+                          onChange={e => handleFileChange(e, 'camera')}
+                          onClick={e => {
+                            e.target.value = null;
+                          }}
+                        />
                         <div className="border border-400 rounded p-3 py-2 d-flex align-items-center custom-nav-item cursor-pointer" style={{ height: '42px' }} onClick={() => setIsAttach(!isAttach)}>
                           <SvgIcon name={'more-vertical'} size={16} />
                         </div>
@@ -1472,7 +1486,7 @@ const Chat = () => {
               {isProfile && (
                 <div id="profile" className="d-flex flex-column gap-4 p-4 border-md-start border-md-300 w-md-100 w-lg-25 custom-profile" style={{ flex: 1, minWidth: '290px' }}>
                   <div className="ms-auto mb-n5">
-                    <div className='d-flex gap-2'>
+                    <div className="d-flex gap-2">
                       <div className="border border-300 d-none d-lg-flex rounded p-3 py-3 p-md-2 py-md-2 d-flex align-items-center custom-nav-item cursor-pointer" onClick={() => setIsProfile(false)}>
                         <SvgIcon name={'x'} size={16} />
                       </div>
@@ -1488,42 +1502,34 @@ const Chat = () => {
                       <p className="fw-light m-0 fs-10">{chat.Dept}</p>
                     </div>
                   </div>
-                  {
-                    chat?.Type == 'G' && (
-                      <div className='d-flex justify-content-between align-items-center'>
-                        <p className="m-0 fs-10 fw-bold">Members</p>
-                        {
-                          chat?.IsActive == "1" && (
-                            <div className="border border-300 rounded p-3 py-3 p-md-2 py-md-2 d-flex align-items-center custom-nav-item cursor-pointer" onClick={() => setIsAddMember(true)}>
-                              <SvgIcon name={'user-profile-add-02'} size={16} />
-                            </div>
-                          )
-                        }
-                      </div>
-                    )
-                  }
+                  {chat?.Type == 'G' && (
+                    <div className="d-flex justify-content-between align-items-center">
+                      <p className="m-0 fs-10 fw-bold">Members</p>
+                      {chat?.IsActive == '1' && (
+                        <div className="border border-300 rounded p-3 py-3 p-md-2 py-md-2 d-flex align-items-center custom-nav-item cursor-pointer" onClick={() => setIsAddMember(true)}>
+                          <SvgIcon name={'user-profile-add-02'} size={16} />
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <div className="d-flex flex-column gap-2 overflow-y-auto custom-scroll" style={{ height: self == top ? htab - 123 : htabe - 123 }}>
-                    {
-                      chat?.Type == 'G' && (
-                        <>
-                          <div className='d-flex flex-column gap-3 overflow-y-auto custom-scroll' style={{ maxHeight: self == top ? htab - 650 : htabe - 650 }}>
-                            {
-                              chat.Members?.sort((a, b) => (a.NIK === lgdata?.NIK ? -1 : b.NIK === lgdata?.NIK ? 1 : 0)).map((i, idx) => (
-                                <>
-                                  <div key={idx} className='d-flex align-items-center gap-2'>
-                                    <Avatar src={i?.Image ? i.Image : getCustomAvatar(i.Title)} size={`${CheckDev.isMobile ? 'xl' : '2xl'}`} className="h-fit" />
-                                    <div className="d-flex flex-column">
-                                      <h5 className="fw-normal fs-11 fs-md-10 m-0">{i.NIK == lgdata?.NIK ? 'You' : i?.Name}</h5>
-                                      <p className="fw-light m-0 fs-11">{i?.Dept}</p>
-                                    </div>
-                                  </div>
-                                </>
-                              ))
-                            }
-                          </div>
-                        </>
-                      )
-                    }
+                    {chat?.Type == 'G' && (
+                      <>
+                        <div className="d-flex flex-column gap-3 overflow-y-auto custom-scroll" style={{ maxHeight: self == top ? htab - 650 : htabe - 650 }}>
+                          {chat.Members?.sort((a, b) => (a.NIK === lgdata?.NIK ? -1 : b.NIK === lgdata?.NIK ? 1 : 0)).map((i, idx) => (
+                            <>
+                              <div key={idx} className="d-flex align-items-center gap-2">
+                                <Avatar src={i?.Image ? i.Image : getCustomAvatar(i.Title)} size={`${CheckDev.isMobile ? 'xl' : '2xl'}`} className="h-fit" />
+                                <div className="d-flex flex-column">
+                                  <h5 className="fw-normal fs-11 fs-md-10 m-0">{i.NIK == lgdata?.NIK ? 'You' : i?.Name}</h5>
+                                  <p className="fw-light m-0 fs-11">{i?.Dept}</p>
+                                </div>
+                              </div>
+                            </>
+                          ))}
+                        </div>
+                      </>
+                    )}
                     {/* <div className="d-flex align-items-center justify-content-between py-3">
                       <p className="m-0 fs-10">Chat Setting</p>
                       <SvgIcon name={'chevron-down'} size={16} />
@@ -1534,55 +1540,49 @@ const Chat = () => {
                     </div> */}
                     <div>
                       <Accordion>
-                        <Accordion.Item eventKey='0' className="border-0 bg-transparent">
-                          <CustomToggle eventKey='0'>
+                        <Accordion.Item eventKey="0" className="border-0 bg-transparent">
+                          <CustomToggle eventKey="0">
                             <p className="m-0 fs-10">Shared Photos</p>
                             <SvgIcon name={'chevron-down'} size={16} />
                           </CustomToggle>
-                          <Accordion.Collapse eventKey='0'>
+                          <Accordion.Collapse eventKey="0">
                             <div className="d-flex flex-column gap-3 my-2">
-                              {
-                                imageMessages.map((i, idx) => (
-                                  <div key={idx} className="d-flex align-items-center justify-content-between">
-                                    <div className="d-flex align-items-center gap-3">
-                                      <img src={i.FileUrl} width={'50'} height={'50'} />
-                                      <p title={i.FileName} style={{ maxWidth: '120px' }} className="m-0 fs-10 text-truncate">{i.FileName}</p>
-                                    </div>
-                                    <div
-                                      onClick={() => handleDownload(i.FileUrl, i.FileName)}
-                                      className="rounded p-2 py-2 bg-200 text-primary d-flex align-items-center cursor-pointer"
-                                    >
-                                      <SvgIcon name={'download'} size={16} />
-                                    </div>
+                              {imageMessages.map((i, idx) => (
+                                <div key={idx} className="d-flex align-items-center justify-content-between">
+                                  <div className="d-flex align-items-center gap-3">
+                                    <img src={i.FileUrl} width={'50'} height={'50'} />
+                                    <p title={i.FileName} style={{ maxWidth: '120px' }} className="m-0 fs-10 text-truncate">
+                                      {i.FileName}
+                                    </p>
                                   </div>
-                                ))
-                              }
+                                  <div onClick={() => handleDownload(i.FileUrl, i.FileName)} className="rounded p-2 py-2 bg-200 text-primary d-flex align-items-center cursor-pointer">
+                                    <SvgIcon name={'download'} size={16} />
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           </Accordion.Collapse>
                         </Accordion.Item>
-                        <Accordion.Item eventKey='1' className="border-0 bg-transparent">
-                          <CustomToggle eventKey='1'>
+                        <Accordion.Item eventKey="1" className="border-0 bg-transparent">
+                          <CustomToggle eventKey="1">
                             <p className="m-0 fs-10">Shared Files</p>
                             <SvgIcon name={'chevron-down'} size={16} />
                           </CustomToggle>
-                          <Accordion.Collapse eventKey='1'>
+                          <Accordion.Collapse eventKey="1">
                             <div className="d-flex flex-column gap-3 my-2">
-                              {
-                                imageDocuments.map((i, idx) => (
-                                  <div key={idx} className="d-flex align-items-center justify-content-between">
-                                    <div className="d-flex align-items-center gap-3">
-                                      <span className="fs-9">📄</span>
-                                      <p title={i.FileName} style={{ maxWidth: '180px' }} className="m-0 fs-10 text-truncate">{i.FileName}</p>
-                                    </div>
-                                    <div
-                                      onClick={() => handleDownload(i.FileUrl, i.FileName)}
-                                      className="rounded p-2 py-2 bg-200 text-primary d-flex align-items-center cursor-pointer"
-                                    >
-                                      <SvgIcon name={'download'} size={16} />
-                                    </div>
+                              {imageDocuments.map((i, idx) => (
+                                <div key={idx} className="d-flex align-items-center justify-content-between">
+                                  <div className="d-flex align-items-center gap-3">
+                                    <span className="fs-9">📄</span>
+                                    <p title={i.FileName} style={{ maxWidth: '180px' }} className="m-0 fs-10 text-truncate">
+                                      {i.FileName}
+                                    </p>
                                   </div>
-                                ))
-                              }
+                                  <div onClick={() => handleDownload(i.FileUrl, i.FileName)} className="rounded p-2 py-2 bg-200 text-primary d-flex align-items-center cursor-pointer">
+                                    <SvgIcon name={'download'} size={16} />
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           </Accordion.Collapse>
                         </Accordion.Item>
@@ -1645,17 +1645,27 @@ const Chat = () => {
         </Card.Body>
       </Card>
 
-      <Modal show={isAdd} backdrop="static" keyboard={false} onHide={() => setIsAdd(false)} size="md" aria-labelledby="contained-modal-title-vcenter" centered >
+      <Modal show={isAdd} backdrop="static" keyboard={false} onHide={() => setIsAdd(false)} size="md" aria-labelledby="contained-modal-title-vcenter" centered>
         <Modal.Header className="px-4 border-0 w-100">
           <div className="d-flex flex-column gap-3 w-100">
             <div className="d-flex justify-content-between align-items-center">
               <h6 className="fs-8 fw-semibold m-0">New Chat</h6>
-              <SvgIcon name={'x'} size={20} className="cursor-pointer" onClick={() => { setIsAdd(false), setKeyword("") }} />
+              <SvgIcon
+                name={'x'}
+                size={20}
+                className="cursor-pointer"
+                onClick={() => {
+                  setIsAdd(false), setKeyword('');
+                }}
+              />
             </div>
             <IsiTxt label={'Search UserID'} placeholder={''} val={keyword} onchange={e => setKeyword(e.target.value)} css={'rounded-2 py-2'} />
           </div>
         </Modal.Header>
-        <Modal.Body className="px-4 pt-0 d-flex flex-column overflow-y-auto custom-scroll mt-n3" style={CheckDev.isMobile ? { minHeight: '13rem', height: self == top ? htab - 270 : htabe - 270 } : { height: self == top ? htab - 335 : htabe - 335 }}>
+        <Modal.Body
+          className="px-4 pt-0 d-flex flex-column overflow-y-auto custom-scroll mt-n3"
+          style={CheckDev.isMobile ? { minHeight: '13rem', height: self == top ? htab - 270 : htabe - 270 } : { height: self == top ? htab - 335 : htabe - 335 }}
+        >
           {filteredUser?.map((i, idx) => (
             <div key={idx} className="d-flex align-items-center justify-content-between border-bottom border-300 py-2 py-md-3 cursor-pointer" onClick={() => handleNewChat(i)}>
               <div className="d-flex gap-4 align-items-center">
@@ -1675,72 +1685,84 @@ const Chat = () => {
           <div className="d-flex flex-column gap-3 w-100">
             <div className="d-flex justify-content-between align-items-center">
               <h6 className="fs-8 fw-semibold m-0">New Group</h6>
-              <SvgIcon name={'x'} size={20} className="cursor-pointer" onClick={() => { resetAddGroup(), setKeyword(""), setPreviewUrl("") }} />
+              <SvgIcon
+                name={'x'}
+                size={20}
+                className="cursor-pointer"
+                onClick={() => {
+                  resetAddGroup(), setKeyword(''), setPreviewUrl('');
+                }}
+              />
             </div>
-            <Row className='g-0 d-flex gap-3 align-items-center w-100'>
-              <Col className='col-1 cursor-pointer' style={{ width: 'fit-content' }}>
+            <Row className="g-0 d-flex gap-3 align-items-center w-100">
+              <Col className="col-1 cursor-pointer" style={{ width: 'fit-content' }}>
                 <input
                   type="file"
                   accept="image/png, image/jpeg, image/jpg"
                   className="d-none"
                   ref={iconInputRef}
                   onChange={handleImageChange}
-                  onClick={(e) => { e.target.value = null; }}
+                  onClick={e => {
+                    e.target.value = null;
+                  }}
                 />
-                <div className={`d-flex flex-column align-items-center gap-3 justify-content-center bg-300 rounded-circle cursor-pinter overflow-hidden ${!previewUrl ? 'p-3' : ''}`} style={{ width: '100px', height: '100px' }} onClick={() => iconInputRef.current.click()}>
+                <div
+                  className={`d-flex flex-column align-items-center gap-3 justify-content-center bg-300 rounded-circle cursor-pinter overflow-hidden ${!previewUrl ? 'p-3' : ''}`}
+                  style={{ width: '100px', height: '100px' }}
+                  onClick={() => iconInputRef.current.click()}
+                >
                   {previewUrl ? (
-                    <img
-                      src={previewUrl}
-                      alt="Group Preview"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
+                    <img src={previewUrl} alt="Group Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
                     <>
                       <SvgIcon name={'camera-01'} size={'24'} />
-                      <p className='m-0 fs-10 text-center lh-sm mt-2'>Add Icon Group</p>
+                      <p className="m-0 fs-10 text-center lh-sm mt-2">Add Icon Group</p>
                     </>
                   )}
                 </div>
               </Col>
-              <Col className='w-100'>
+              <Col className="w-100">
                 <IsiTxt label={'Group Name'} placeholder={'Input Group Name'} id={'Title'} val={Obj?.Data?.Title} onchange={txtChange} css={'rounded-2 py-2 w-100'} />
               </Col>
             </Row>
 
             <IsiTxt label={'Add User'} placeholder={''} val={keyword} onchange={e => setKeyword(e.target.value)} css={'rounded-2 py-2'} />
-            <div className='d-flex gap-2 flex-wrap overflow-y-auto mb-2' style={{ maxHeight: '70px', scrollbarWidth: 'thin' }}>
-              {
-                Obj?.ListMember?.map(i => (
-                  <div className='bg-primary-light text-primary fs-10 m-0 px-3 py-1 rounded-pill w-fit d-flex align-items-center gap-2'>
-                    <p className='m-0'>{i.Name}</p>
-                    <SvgIcon name={'x'} size={17} className="cursor-pointer" onClick={() => handleAddUser(i)} />
-                  </div>
-                ))
-              }
+            <div className="d-flex gap-2 flex-wrap overflow-y-auto mb-2" style={{ maxHeight: '70px', scrollbarWidth: 'thin' }}>
+              {Obj?.ListMember?.map(i => (
+                <div className="bg-primary-light text-primary fs-10 m-0 px-3 py-1 rounded-pill w-fit d-flex align-items-center gap-2">
+                  <p className="m-0">{i.Name}</p>
+                  <SvgIcon name={'x'} size={17} className="cursor-pointer" onClick={() => handleAddUser(i)} />
+                </div>
+              ))}
             </div>
           </div>
         </Modal.Header>
-        <Modal.Body className="px-4 pt-0 d-flex flex-column overflow-y-auto custom-scroll mt-n3" style={CheckDev.isMobile ? { minHeight: '9rem', maxHeight: self == top ? htab - 395 : htabe - 395 } : { maxHeight: self == top ? htab - 470 : htabe - 470 }}>
+        <Modal.Body
+          className="px-4 pt-0 d-flex flex-column overflow-y-auto custom-scroll mt-n3"
+          style={CheckDev.isMobile ? { minHeight: '9rem', maxHeight: self == top ? htab - 395 : htabe - 395 } : { maxHeight: self == top ? htab - 470 : htabe - 470 }}
+        >
           {filteredUser?.map((i, idx) => (
             <div key={idx} className="d-flex align-items-center justify-content-between border-bottom border-300 py-2 py-md-3">
               <div className="d-flex gap-4 align-items-center">
                 <Avatar src={i.Link} size="3xl" />
                 <h5 className="fw-bold fs-10 fs-md-9 m-0">{i.Name}</h5>
               </div>
-              {
-                i.isAddGroup === 0 ?
-                  <Button variant="primary" className="rounded-3 d-flex align-items-center gap-2 p-2 p-md-3 py-2 py-md-3 font-sans-serif fw-semibold" onClick={() => handleAddUser(i)}>
-                    <SvgIcon name={'plus'} size={17} />
-                  </Button>
-                  : <Button variant="primary" className="rounded-3 d-flex align-items-center gap-2 p-2 p-md-3 py-2 py-md-3 font-sans-serif fw-semibold" onClick={() => handleAddUser(i)}>
-                    <SvgIcon name={'x'} size={17} />
-                  </Button>
-              }
+              {i.isAddGroup === 0 ? (
+                <Button variant="primary" className="rounded-3 d-flex align-items-center gap-2 p-2 p-md-3 py-2 py-md-3 font-sans-serif fw-semibold" onClick={() => handleAddUser(i)}>
+                  <SvgIcon name={'plus'} size={17} />
+                </Button>
+              ) : (
+                <Button variant="primary" className="rounded-3 d-flex align-items-center gap-2 p-2 p-md-3 py-2 py-md-3 font-sans-serif fw-semibold" onClick={() => handleAddUser(i)}>
+                  <SvgIcon name={'x'} size={17} />
+                </Button>
+              )}
             </div>
           ))}
         </Modal.Body>
-        <Modal.Footer className='px-3 pb-3 pt-2 border-0'>
-          <Button variant='primary' disabled={Obj?.ListMember?.length == 0 || Obj?.Data?.Title == ''} className='rounded-3 px-3 py-2 font-sans-serif fw-normal fs-10' onClick={handleSaveGroup}>Save</Button>
+        <Modal.Footer className="px-3 pb-3 pt-2 border-0">
+          <Button variant="primary" disabled={Obj?.ListMember?.length == 0 || Obj?.Data?.Title == ''} className="rounded-3 px-3 py-2 font-sans-serif fw-normal fs-10" onClick={handleSaveGroup}>
+            Save
+          </Button>
         </Modal.Footer>
       </Modal>
 
@@ -1749,43 +1771,52 @@ const Chat = () => {
           <div className="d-flex flex-column gap-3 w-100">
             <div className="d-flex justify-content-between align-items-center">
               <h6 className="fs-8 fw-semibold m-0">Add Member</h6>
-              <SvgIcon name={'x'} size={20} className="cursor-pointer" onClick={() => { resetAddGroup(), setKeyword("") }} />
+              <SvgIcon
+                name={'x'}
+                size={20}
+                className="cursor-pointer"
+                onClick={() => {
+                  resetAddGroup(), setKeyword('');
+                }}
+              />
             </div>
             <IsiTxt label={'Add User'} placeholder={''} val={keyword} onchange={e => setKeyword(e.target.value)} css={'rounded-2 py-2'} />
-            <div className='d-flex gap-2 flex-wrap overflow-y-auto mb-2' style={{ maxHeight: '70px', scrollbarWidth: 'thin' }}>
-              {
-                Obj?.ListMember?.map(i => (
-                  <div className='bg-primary-light text-primary fs-10 m-0 px-3 py-1 rounded-pill w-fit d-flex align-items-center gap-2'>
-                    <p className='m-0'>{i.Name}</p>
-                    <SvgIcon name={'x'} size={17} className="cursor-pointer" onClick={() => handleAddUser(i)} />
-                  </div>
-                ))
-              }
+            <div className="d-flex gap-2 flex-wrap overflow-y-auto mb-2" style={{ maxHeight: '70px', scrollbarWidth: 'thin' }}>
+              {Obj?.ListMember?.map(i => (
+                <div className="bg-primary-light text-primary fs-10 m-0 px-3 py-1 rounded-pill w-fit d-flex align-items-center gap-2">
+                  <p className="m-0">{i.Name}</p>
+                  <SvgIcon name={'x'} size={17} className="cursor-pointer" onClick={() => handleAddUser(i)} />
+                </div>
+              ))}
             </div>
           </div>
         </Modal.Header>
-        <Modal.Body className="px-4 pt-0 d-flex flex-column overflow-y-auto custom-scroll mt-n3" style={CheckDev.isMobile ? { minHeight: '12rem', maxHeight: self == top ? htab - 395 : htabe - 395 } : { maxHeight: self == top ? htab - 470 : htabe - 470 }}>
-          {
-            availableAddMember?.map((i, idx) => (
-              <div key={idx} className="d-flex align-items-center justify-content-between border-bottom border-300 py-2 py-md-3">
-                <div className="d-flex gap-4 align-items-center">
-                  <Avatar src={i.Link} size="3xl" />
-                  <h5 className="fw-bold fs-10 fs-md-9 m-0">{i.Name}</h5>
-                </div>
-                {
-                  i.isAddGroup === 0 ?
-                    <Button variant="primary" className="rounded-3 d-flex align-items-center gap-2 p-2 p-md-3 py-2 py-md-3 font-sans-serif fw-semibold" onClick={() => handleAddUser(i)}>
-                      <SvgIcon name={'plus'} size={17} />
-                    </Button>
-                    : <Button variant="primary" className="rounded-3 d-flex align-items-center gap-2 p-2 p-md-3 py-2 py-md-3 font-sans-serif fw-semibold" onClick={() => handleAddUser(i)}>
-                      <SvgIcon name={'x'} size={17} />
-                    </Button>
-                }
+        <Modal.Body
+          className="px-4 pt-0 d-flex flex-column overflow-y-auto custom-scroll mt-n3"
+          style={CheckDev.isMobile ? { minHeight: '12rem', maxHeight: self == top ? htab - 395 : htabe - 395 } : { maxHeight: self == top ? htab - 470 : htabe - 470 }}
+        >
+          {availableAddMember?.map((i, idx) => (
+            <div key={idx} className="d-flex align-items-center justify-content-between border-bottom border-300 py-2 py-md-3">
+              <div className="d-flex gap-4 align-items-center">
+                <Avatar src={i.Link} size="3xl" />
+                <h5 className="fw-bold fs-10 fs-md-9 m-0">{i.Name}</h5>
               </div>
-            ))}
+              {i.isAddGroup === 0 ? (
+                <Button variant="primary" className="rounded-3 d-flex align-items-center gap-2 p-2 p-md-3 py-2 py-md-3 font-sans-serif fw-semibold" onClick={() => handleAddUser(i)}>
+                  <SvgIcon name={'plus'} size={17} />
+                </Button>
+              ) : (
+                <Button variant="primary" className="rounded-3 d-flex align-items-center gap-2 p-2 p-md-3 py-2 py-md-3 font-sans-serif fw-semibold" onClick={() => handleAddUser(i)}>
+                  <SvgIcon name={'x'} size={17} />
+                </Button>
+              )}
+            </div>
+          ))}
         </Modal.Body>
-        <Modal.Footer className='px-3 pb-3 pt-2 border-0'>
-          <Button disabled={Obj?.ListMember?.length == 0} variant='primary' className='rounded-3 px-3 py-2 font-sans-serif fw-normal fs-10' onClick={handleAddMember}>Save</Button>
+        <Modal.Footer className="px-3 pb-3 pt-2 border-0">
+          <Button disabled={Obj?.ListMember?.length == 0} variant="primary" className="rounded-3 px-3 py-2 font-sans-serif fw-normal fs-10" onClick={handleAddMember}>
+            Save
+          </Button>
         </Modal.Footer>
       </Modal>
 
@@ -1793,11 +1824,7 @@ const Chat = () => {
         <Modal.Body className="d-flex flex-column justify-content-center align-items-center gap-3">
           <h5 className="fw-semibold fs-8">Are you sure want to Delete Room?</h5>
           <div className="d-flex gap-3">
-            <Button
-              className="px-8 fs-10 py-1 fw-normal"
-              variant="primary"
-              onClick={() => handleDeleteRoom(deleteRoomId)}
-            >
+            <Button className="px-8 fs-10 py-1 fw-normal" variant="primary" onClick={() => handleDeleteRoom(deleteRoomId)}>
               Yes
             </Button>
             <Button className="px-8 fs-10 py-1 fw-normal" variant="danger" onClick={() => setIsDeleteRoom(false)}>
@@ -1811,11 +1838,7 @@ const Chat = () => {
         <Modal.Body className="d-flex flex-column justify-content-center align-items-center gap-3">
           <h5 className="fw-semibold fs-8">Are you sure want to delete history chat?</h5>
           <div className="d-flex gap-3">
-            <Button
-              className="px-8 fs-10 py-1 fw-normal"
-              variant="primary"
-              onClick={() => handleDeleteChat(activeRoomId)}
-            >
+            <Button className="px-8 fs-10 py-1 fw-normal" variant="primary" onClick={() => handleDeleteChat(activeRoomId)}>
               Yes
             </Button>
             <Button className="px-8 fs-10 py-1 fw-normal" variant="danger" onClick={() => setIsDeleteChat(false)}>
@@ -1829,11 +1852,7 @@ const Chat = () => {
         <Modal.Body className="d-flex flex-column justify-content-center align-items-center gap-3">
           <h5 className="fw-semibold fs-8">Are you sure want to Leave?</h5>
           <div className="d-flex gap-3">
-            <Button
-              className="px-8 fs-10 py-1 fw-normal"
-              variant="primary"
-              onClick={() => handleLeaveGroup(activeRoomId)}
-            >
+            <Button className="px-8 fs-10 py-1 fw-normal" variant="primary" onClick={() => handleLeaveGroup(activeRoomId)}>
               Yes
             </Button>
             <Button className="px-8 fs-10 py-1 fw-normal" variant="danger" onClick={() => setisLeaveGroup(false)}>
@@ -1843,35 +1862,23 @@ const Chat = () => {
         </Modal.Body>
       </Modal>
 
-      <Modal
-        show={previewIndex !== null}
-        onHide={() => setPreviewIndex(null)}
-        centered
-        contentClassName="bg-transparent border-0 shadow-none"
-        fullscreen
-      >
-        <Button variant='light' className='rounded p-2 py-2 text-primary d-flex align-items-center cursor-pointer position-absolute m-3 m-lg-5 end-0' onClick={() => {
-          setPreviewIndex(null);
-        }}
-          style={{ zIndex: 10 }}>
+      <Modal show={previewIndex !== null} onHide={() => setPreviewIndex(null)} centered contentClassName="bg-transparent border-0 shadow-none" fullscreen>
+        <Button
+          variant="light"
+          className="rounded p-2 py-2 text-primary d-flex align-items-center cursor-pointer position-absolute m-3 m-lg-5 end-0"
+          onClick={() => {
+            setPreviewIndex(null);
+          }}
+          style={{ zIndex: 10 }}
+        >
           <SvgIcon name={'x'} size={24} />
         </Button>
         <Modal.Body className="p-0 position-relative">
-
           {previewIndex !== null && (
-            <Carousel
-              activeIndex={previewIndex}
-              onSelect={(idx) => setPreviewIndex(idx)}
-              interval={null}
-              indicators={imageMessages.length > 1}
-              controls={imageMessages.length > 1}
-            >
-              {imageMessages.map((img) => (
+            <Carousel activeIndex={previewIndex} onSelect={idx => setPreviewIndex(idx)} interval={null} indicators={imageMessages.length > 1} controls={imageMessages.length > 1}>
+              {imageMessages.map(img => (
                 <Carousel.Item key={img.ChatId}>
-                  <div
-                    className="d-flex justify-content-center align-items-center"
-                    style={{ height: '100vh' }}
-                  >
+                  <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
                     <img
                       src={img.FileUrl}
                       alt={img.FileName}
@@ -1889,6 +1896,15 @@ const Chat = () => {
               ))}
             </Carousel>
           )}
+        </Modal.Body>
+      </Modal>
+
+      <Modal show={isDebug} size="md" onHide={() => setIsDebug(false)} centered>
+        <Modal.Body className='fs-11'>
+          <strong>[Debug Push Notif]</strong>
+          {debugLogs.map((log, index) => (
+            <div key={index} className="fs-11">{log}</div>
+          ))}
         </Modal.Body>
       </Modal>
     </>
