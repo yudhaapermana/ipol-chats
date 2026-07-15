@@ -1190,13 +1190,9 @@ const Chat = () => {
                       <SvgIcon name={'trash-01'} size={16} />
                     </div>
                   )}
-                  {
-                    Capacitor.isNativePlatform() && (
-                      <div className="border border-300 rounded p-3 py-3 p-md-2 py-md-2 d-flex align-items-center custom-nav-item cursor-pointer" onClick={() => setIsDebug(true)}>
-                        <SvgIcon name={'zap'} size={16} />
-                      </div>
-                    )
-                  }
+                  <div className="border border-300 rounded p-3 py-3 p-md-2 py-md-2 d-flex align-items-center custom-nav-item cursor-pointer" onClick={() => setIsDebug(true)}>
+                    <SvgIcon name={'zap'} size={16} />
+                  </div>
                   <div className="border border-300 rounded p-3 py-3 p-md-2 py-md-2 d-flex align-items-center custom-nav-item cursor-pointer" onClick={() => setIsGroup(true)}>
                     <SvgIcon name={'users'} size={16} />
                   </div>
