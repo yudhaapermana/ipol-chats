@@ -192,12 +192,15 @@ const Chat = () => {
 
     PushNotifications.addListener('registration', async (apnsToken) => {
       console.log('APNs Token:', apnsToken.value);
+      alert('APNs Token diterima: ' + apnsToken.value);
       try {
         const result = await FCM.getToken();
         console.log('FCM Token Anda:', result.token);
+        alert('FCM Token: ' + result.token);
         saveToken(result.token);
       } catch (err) {
         console.error('Gagal ambil FCM token:', err);
+        alert('Error FCM getToken: ' + JSON.stringify(err));
       }
     });
 
