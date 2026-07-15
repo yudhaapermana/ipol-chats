@@ -18,6 +18,7 @@ import { PushNotifications } from '@capacitor/push-notifications';
 import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { formatText } from 'helpers/formatText'
+import { FCM } from '@capacitor-community/fcm'
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -189,9 +190,15 @@ const Chat = () => {
 
     await PushNotifications.register();
 
-    PushNotifications.addListener('registration', token => {
-      console.log('FCM Token Anda:', token.value);
-      saveToken(token.value);
+    PushNotifications.addListener('registration', async (apnsToken) => {
+      console.log('APNs Token:', apnsToken.value);
+      try {
+        const result = await FCM.getToken();
+        console.log('FCM Token Anda:', result.token);
+        saveToken(result.token);
+      } catch (err) {
+        console.error('Gagal ambil FCM token:', err);
+      }
     });
 
     PushNotifications.addListener('registrationError', error => {
