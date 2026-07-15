@@ -203,11 +203,19 @@ const CustomNavbar = ({ onHamburgerClick }) => {
 
   const handleOpenErp = () => {
     window.open(URLErp, '_blank');
-  }
+  };
 
   return (
     <>
-      <Navbar className="px-3 d-flex align-items-center position-sticky w-100 bg-light-subtle position-relative" style={{ height: '49px', zIndex: 1020, top: 0 }}>
+      <Navbar
+        className="px-3 d-flex align-items-center position-sticky w-100 bg-light-subtle position-relative"
+        style={{
+          height: 'calc(49px + env(safe-area-inset-top, 0px))',
+          paddingTop: 'env(safe-area-inset-top, 0px)',
+          zIndex: 1020,
+          top: 0
+        }}
+      >
         <Image
           src={!CheckDev.isMobile ? logoBsr : logoMini}
           height={CheckDev.isMobile ? 32 : 45}
@@ -502,9 +510,8 @@ const CustomNavbar = ({ onHamburgerClick }) => {
           >
             <div className="border border-400 rounded p-2 py-2 d-flex align-items-center custom-nav-item cursor-pointer" onClick={handleOpenErp}>
               <SvgIcon name={'erp'} size={12} />
-            </div>            
+            </div>
           </OverlayTrigger>
-
 
           {lgdata && (
             <Dropdown>
