@@ -181,13 +181,13 @@ const Chat = () => {
     // };
   }, []);
 
-  const registerPushNotifications = async () => {
+  const registerPushNotifications = () => {
     addLog('1. Memulai cek izin...');
-    let permStatus = await PushNotifications.checkPermissions();
+    let permStatus =  PushNotifications.checkPermissions();
 
     if (permStatus.receive === 'prompt') {
       addLog('2. Meminta izin pengguna...');
-      permStatus = await PushNotifications.requestPermissions();
+      permStatus =  PushNotifications.requestPermissions();
     }
 
     if (permStatus.receive !== 'granted') {
@@ -196,12 +196,12 @@ const Chat = () => {
       return;
     }
 
-    PushNotifications.addListener('registration', async apnsToken => {
+    PushNotifications.addListener('registration',  apnsToken => {
       console.log('APNs Token:', apnsToken.value);
       addLog('5. Sukses dapat APNs: ' + apnsToken.value.substring(0, 10) + '...');
       try {
         addLog('6. Meminta FCM Token...');
-        const result = await FCM.getToken();
+        const result =  FCM.getToken();
         console.log('FCM Token Anda:', result.token);
         addLog('7. FCM didapat: ' + result.token.substring(0, 10) + '...');
         saveToken(result.token);
@@ -216,15 +216,15 @@ const Chat = () => {
       addLog('X. APNs Error: ' + JSON.stringify(error));
     });
 
-    PushNotifications.addListener('pushNotificationActionPerformed', async action => {
+    PushNotifications.addListener('pushNotificationActionPerformed', action => {
       const roomId = action.notification.data?.roomId;
       try {
-        await PushNotifications.removeAllDeliveredNotifications();
+         PushNotifications.removeAllDeliveredNotifications();
       } catch (err) {
         console.error('Gagal menghapus notifikasi:', err);
       }
 
-      await GetInbox();
+      GetInbox();
 
       if (roomId) {
         pendingRoomId.current = roomId;
@@ -234,10 +234,10 @@ const Chat = () => {
       }
     });
 
-    App.addListener('appStateChange', async ({ isActive }) => {
+    App.addListener('appStateChange', ({ isActive }) => {
       if (isActive) {
         try {
-          await PushNotifications.removeAllDeliveredNotifications();
+          PushNotifications.removeAllDeliveredNotifications();
         } catch (err) {
           console.error('Gagal menghapus notifikasi saat resume:', err);
         }
@@ -246,7 +246,7 @@ const Chat = () => {
     });
 
     addLog('Izin diberikan. Memanggil APNs register...');
-    await PushNotifications.register();
+    PushNotifications.register();
     addLog('Perintah APNs register selesai dieksekusi.');
 
   };
