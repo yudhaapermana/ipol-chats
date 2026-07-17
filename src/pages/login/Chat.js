@@ -163,7 +163,7 @@ const Chat = () => {
     };
   }, [activeRoomId, Obj, chat]);
 
-  useEffect(() => {
+  useEffect(async () => {
     if ('Notification' in window) {
       if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
         Notification.requestPermission();
@@ -171,7 +171,7 @@ const Chat = () => {
     }
 
     if (Capacitor.isNativePlatform()) {
-      registerPushNotifications();
+      await registerPushNotifications();
     }
 
     // return () => {
@@ -181,13 +181,13 @@ const Chat = () => {
     // };
   }, []);
 
-  const registerPushNotifications = () => {
+  const registerPushNotifications = async () => {
     addLog('1. Memulai cek izin...');
-    let permStatus =  PushNotifications.checkPermissions();
+    let permStatus = await PushNotifications.checkPermissions();
 
     if (permStatus.receive === 'prompt') {
       addLog('2. Meminta izin pengguna...');
-      permStatus =  PushNotifications.requestPermissions();
+      permStatus = await PushNotifications.requestPermissions();
     }
 
     if (permStatus.receive !== 'granted') {
@@ -196,15 +196,19 @@ const Chat = () => {
       return;
     }
 
-    PushNotifications.addListener('registration',  apnsToken => {
+    addLog('3. Izin diberikan. Memanggil APNs register...');
+    await PushNotifications.register();
+    addLog('4. Perintah APNs register selesai dieksekusi.');
+
+    PushNotifications.addListener('registration', async apnsToken => {
       console.log('APNs Token:', apnsToken.value);
       addLog('5. Sukses dapat APNs: ' + apnsToken.value.substring(0, 10) + '...');
       try {
         addLog('6. Meminta FCM Token...');
-        const result =  FCM.getToken();
+        const result = await FCM.getToken();
         console.log('FCM Token Anda:', result.token);
         addLog('7. FCM didapat: ' + result.token.substring(0, 10) + '...');
-        saveToken(result.token);
+        await saveToken(result.token);
       } catch (err) {
         console.error('Gagal ambil FCM token:', err);
         addLog('X. Error ambil FCM: ' + err.message);
@@ -216,15 +220,15 @@ const Chat = () => {
       addLog('X. APNs Error: ' + JSON.stringify(error));
     });
 
-    PushNotifications.addListener('pushNotificationActionPerformed', action => {
+    PushNotifications.addListener('pushNotificationActionPerformed', async action => {
       const roomId = action.notification.data?.roomId;
       try {
-         PushNotifications.removeAllDeliveredNotifications();
+        await PushNotifications.removeAllDeliveredNotifications();
       } catch (err) {
         console.error('Gagal menghapus notifikasi:', err);
       }
 
-      GetInbox();
+      await GetInbox();
 
       if (roomId) {
         pendingRoomId.current = roomId;
@@ -234,21 +238,16 @@ const Chat = () => {
       }
     });
 
-    App.addListener('appStateChange', ({ isActive }) => {
+    App.addListener('appStateChange', async ({ isActive }) => {
       if (isActive) {
         try {
-          PushNotifications.removeAllDeliveredNotifications();
+          await PushNotifications.removeAllDeliveredNotifications();
         } catch (err) {
           console.error('Gagal menghapus notifikasi saat resume:', err);
         }
         GetInbox();
       }
     });
-
-    addLog('Izin diberikan. Memanggil APNs register...');
-    PushNotifications.register();
-    addLog('Perintah APNs register selesai dieksekusi.');
-
   };
 
   useEffect(() => {
