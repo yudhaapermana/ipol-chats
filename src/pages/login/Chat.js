@@ -244,10 +244,10 @@ const Chat = () => {
         GetInbox();
       }
     });
-    
-    addLog('3. Izin diberikan. Memanggil APNs register...');
+
+    addLog('Izin diberikan. Memanggil APNs register...');
     await PushNotifications.register();
-    addLog('4. Perintah APNs register selesai dieksekusi.');
+    addLog('Perintah APNs register selesai dieksekusi.');
 
   };
 
