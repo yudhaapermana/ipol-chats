@@ -51,5 +51,13 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+    <string>Aplikasi membutuhkan akses kamera agar kamu bisa memotret dan mengirim gambar langsung ke dalam chat.</string>
+    
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Aplikasi membutuhkan akses galeri agar kamu bisa memilih dan mengirim foto atau video.</string>
+    
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>Aplikasi membutuhkan akses untuk menyimpan foto atau media ke dalam galeri perangkat.</string>
 </dict>
 </plist>

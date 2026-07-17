@@ -1174,7 +1174,7 @@ const Chat = () => {
   return (
     <>
       <Card className="w-100 h-100">
-        <Card.Body className="p-0 d-flex" style={{ height: self == top ? htab + 30 : htabe + 30 }}>
+        <Card.Body className="p-0 d-flex" style={{ height: self == top ? htab - 7 : htabe - 7 }}>
           {((CheckDev.isMobile && !activeRoomId) || !CheckDev.isMobile) && (
             <div id="list" className="d-flex flex-column gap-3 p-4 border-md-end border-md-300" style={{ flex: 1, maxWidth: activeRoomId && '23%', minWidth: '320px' }}>
               <div id="top" className="d-flex justify-content-end align-items-start">
@@ -1190,9 +1190,9 @@ const Chat = () => {
                       <SvgIcon name={'trash-01'} size={16} />
                     </div>
                   )}
-                  <div className="border border-300 rounded p-3 py-3 p-md-2 py-md-2 d-flex align-items-center custom-nav-item cursor-pointer" onClick={() => setIsDebug(true)}>
+                  {/* <div className="border border-300 rounded p-3 py-3 p-md-2 py-md-2 d-flex align-items-center custom-nav-item cursor-pointer" onClick={() => setIsDebug(true)}>
                     <SvgIcon name={'zap'} size={16} />
-                  </div>
+                  </div> */}
                   <div className="border border-300 rounded p-3 py-3 p-md-2 py-md-2 d-flex align-items-center custom-nav-item cursor-pointer" onClick={() => setIsGroup(true)}>
                     <SvgIcon name={'users'} size={16} />
                   </div>
