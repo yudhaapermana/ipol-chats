@@ -210,8 +210,7 @@ const CustomNavbar = ({ onHamburgerClick }) => {
       <Navbar
         className="px-3 d-flex align-items-center position-sticky w-100 bg-light-subtle position-relative"
         style={{
-          height: 'calc(49px + env(safe-area-inset-top, 0px))',
-          paddingTop: 'env(safe-area-inset-top, 0px)',
+          height: '49px',
           zIndex: 1020,
           top: 0
         }}

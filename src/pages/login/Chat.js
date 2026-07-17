@@ -788,7 +788,7 @@ const Chat = () => {
     setObj({
       ...Obj,
       Data: {
-        ...Obj?.Data,
+        // ...Obj?.Data,
         [id]: val
       }
     });
