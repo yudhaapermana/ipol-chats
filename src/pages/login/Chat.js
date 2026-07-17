@@ -196,10 +196,6 @@ const Chat = () => {
       return;
     }
 
-    addLog('3. Izin diberikan. Memanggil APNs register...');
-    await PushNotifications.register();
-    addLog('4. Perintah APNs register selesai dieksekusi.');
-
     PushNotifications.addListener('registration', async apnsToken => {
       console.log('APNs Token:', apnsToken.value);
       addLog('5. Sukses dapat APNs: ' + apnsToken.value.substring(0, 10) + '...');
@@ -248,6 +244,11 @@ const Chat = () => {
         GetInbox();
       }
     });
+    
+    addLog('3. Izin diberikan. Memanggil APNs register...');
+    await PushNotifications.register();
+    addLog('4. Perintah APNs register selesai dieksekusi.');
+
   };
 
   useEffect(() => {
