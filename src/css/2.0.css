@@ -259,14 +259,6 @@ aside.EmojiPickerReact {
   font-size: 12px !important;
 }
 
-.modal {
-  padding-top: env(safe-area-inset-top) !important;
-}
-
-.fixed-top {
-  padding-top: env(safe-area-inset-top) !important;
-}
-
 /* =========================================
    5. ANIMATIONS
    ========================================= */
