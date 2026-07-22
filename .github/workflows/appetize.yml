@@ -1,0 +1,53 @@
+name: Build iOS for Appetize
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+            
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+      
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate .env file
+        run: |
+          echo "REACT_APP_URL_API=${{ secrets.REACT_APP_URL_API }}" >> .env
+          echo "REACT_APP_URL_IPOL=${{ secrets.REACT_APP_URL_IPOL }}" >> .env
+          echo "REACT_APP_URL_MOBILE=${{ secrets.REACT_APP_URL_MOBILE }}" >> .env
+          echo "REACT_APP_URL_ERP=${{ secrets.REACT_APP_URL_ERP }}" >> .env
+          echo "REACT_APP_GOOGLE_API_KEY=${{ secrets.REACT_APP_GOOGLE_API_KEY }}" >> .env
+          echo "REACT_APP_TINYMCE_APIKEY=${{ secrets.REACT_APP_TINYMCE_APIKEY }}" >> .env
+          echo "ESLINT_NO_DEV_ERRORS=true" >> .env
+          echo "SKIP_PREFLIGHT_CHECK=true" >> .env
+          echo "CI=false" >> .env
+      
+      - name: Build web assets
+        run: CI=false npm run build
+      
+      - name: Sync Capacitor iOS
+        run: npx cap sync ios
+      
+      - name: Install CocoaPods
+        run: cd ios/App && pod install
+      
+      - name: Build iOS Simulator App
+        run: |
+          cd ios/App
+          xcodebuild -workspace App.xcworkspace -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build_simulator CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+                
+      - name: Compress .app to .zip
+        run: |
+          cd ios/App/build_simulator/Build/Products/Debug-iphonesimulator          
+          zip -r appetize_build.zip App.app
+                
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: appetize-build
+          path: ios/App/build_simulator/Build/Products/Debug-iphonesimulator/appetize_build.zip
