@@ -261,7 +261,7 @@ const MainLayout = () => {
   return (
     <>
       {isOpen && (
-        <div className="app-container" onClick={handleContentClick}>
+        <div className="app-container" onClick={handleContentClick} style={{paddingTop: 'env(safe-area-inset-top)'}}>
           {/* {erps != 'Y' && (navbarPosition === 'vertical' || navbarPosition === 'combo') && (
             <Sidebar
               isExpanded={isExpanded}
