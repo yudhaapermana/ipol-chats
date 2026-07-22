@@ -18,7 +18,7 @@ const IsiLogin = () => {
 
   return (
     <>
-      <div className="p-4 custom-login" style={{ height: self === top ? htab + 110 : htabe + 110 }}>
+      <div className="p-4 custom-login" style={{ height: self === top ? htab + 110 : htabe + 110, paddingTop: 'env(safe-area-inset-top)'}}>
         <Row className="g-0 h-100">
           <Col md={5} lg={6} xl={6} className="d-none d-md-block">
             {/* <Image src={bg} fluid className="w-100 rounded-4" style={{ objectFit: 'cover', objectPosition: 'center', height: self == top ? htab + 66 : htabe + 66 }} /> */}
