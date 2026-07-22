@@ -8,9 +8,9 @@ const config: CapacitorConfig = {
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert']
     }
-    // StatusBar: {
-    //   overlaysWebView: false
-    // }
+    StatusBar: {
+      overlaysWebView: false
+    }
   },
   server: {
     androidScheme: 'https',
