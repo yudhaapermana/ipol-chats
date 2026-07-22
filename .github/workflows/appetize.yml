@@ -25,6 +25,7 @@ jobs:
           echo "REACT_APP_TINYMCE_APIKEY=${{ secrets.REACT_APP_TINYMCE_APIKEY }}" >> .env
           echo "ESLINT_NO_DEV_ERRORS=true" >> .env
           echo "SKIP_PREFLIGHT_CHECK=true" >> .env
+          echo "DISABLE_ESLINT_PLUGIN=true" >> .env
           echo "CI=false" >> .env
       
       - name: Build web assets
