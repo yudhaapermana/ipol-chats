@@ -60,7 +60,7 @@ workflows:
             -workspace "$XCODE_WORKSPACE" \
             -scheme "$XCODE_SCHEME" \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator, name=iPhone 17,OS=26.4.1' \
+            -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.4.1' \
             -configuration Debug \
             CONFIGURATION_BUILD_DIR=$CM_BUILD_DIR/build/simulator
 
