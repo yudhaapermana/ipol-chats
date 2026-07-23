@@ -27,6 +27,8 @@ const CustomNavbar = ({ onHamburgerClick }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [keyword, setKeyword] = useState('');
   const [isLogout, setIsLogout] = useState(false);
+  const [isECard, setIsECard] = useState(false);
+  const [qrS, setQrS] = useState();
   let img = '';
   if (lgdata && lgdata.Link) img = lgdata.Link;
 
@@ -204,6 +206,46 @@ const CustomNavbar = ({ onHamburgerClick }) => {
   const handleOpenErp = () => {
     window.open(URLErp, '_blank');
   };
+
+  const qrsize = 200;
+  const enQr = true;
+  const tkn = true;
+
+  const getQr = async () => {
+    const qr = lgdata?.NIK;    
+    var prm = undefined;
+
+    if (enQr) {
+      prm = {
+        nik: qr,
+        lebar: qrsize,
+        tinggi: qrsize
+      };
+    } else {
+      prm = {
+        id: qr,
+        lebar: qrsize,
+        tinggi: qrsize
+      };
+    }
+    var res = await axios.get(
+      `${URL}api/Utility/${enQr ? 'GetQRNik' : 'GenerateQR'}`,
+      {
+        params: prm,
+        headers: {
+          Keys: tkn ? lgdata.UserTkn : qr?.substring(1)
+        }
+      }
+    );
+
+    setQrS(await res.data);
+  };
+
+  useEffect(() => {
+    if (lgdata?.NIK) {
+      getQr();
+    }
+  }, [lgdata?.NIK, qrsize]);
 
   return (
     <>
@@ -575,7 +617,7 @@ const CustomNavbar = ({ onHamburgerClick }) => {
                         </Link>
                       </Col> */}
                     </Row>
-                    <Button variant="primary" className="w-100 fw-normal fs-10 py-1 d-flex align-items-center justify-content-center mb-3" onClick={() => navigate('/hrga/Hrd013_EcardAccess')}>
+                    <Button variant="primary" className="w-100 fw-normal fs-10 py-1 d-flex align-items-center justify-content-center mb-3" onClick={() => setIsECard(true)}>
                       <SvgIcon name={'user-profile-square'} size={14} className="me-2" />
                       E-Card
                     </Button>
@@ -620,6 +662,17 @@ const CustomNavbar = ({ onHamburgerClick }) => {
               No
             </Button>
           </div>
+        </Modal.Body>
+      </Modal>
+
+      <Modal show={isECard} size='sm' onHide={() => setIsECard(false)} centered>
+        <Modal.Body className='p-3 d-flex justify-content-center'>
+          <Image
+            height={qrsize}
+            width={qrsize}
+            className="img-fluid"
+            src={`data:image/jpeg;base64,${qrS}`}
+          />
         </Modal.Body>
       </Modal>
     </>
