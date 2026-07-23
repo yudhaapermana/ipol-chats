@@ -163,22 +163,19 @@ const Chat = () => {
     };
   }, [activeRoomId, Obj, chat]);
 
-  useEffect(async () => {
+  useEffect(() => {
     if ('Notification' in window) {
       if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
         Notification.requestPermission();
       }
     }
 
-    if (Capacitor.isNativePlatform()) {
-      await registerPushNotifications();
+    if (Capacitor.isNativePlatform()) {      
+      const initPush = async () => {
+        await registerPushNotifications();
+      };
+      initPush();
     }
-
-    // return () => {
-    //   if (Capacitor.isNativePlatform()) {
-    //     PushNotifications.removeAllListeners();
-    //   }
-    // };
   }, []);
 
   const registerPushNotifications = async () => {
@@ -1086,7 +1083,7 @@ const Chat = () => {
     const safeFilename = filename || `downloaded_file_${Date.now()}`;
 
     try {
-      if (Capacitor.isNativePlatform()) {        
+      if (Capacitor.isNativePlatform()) {
         const response = await axios({
           url: `${link}/GetFile?url=${encodeURIComponent(url)}`,
           method: 'GET',
@@ -1101,13 +1098,13 @@ const Chat = () => {
           data: base64Data,
           directory: Directory.Cache
         });
-        
+
         await Share.share({
           title: safeFilename,
           url: savedFile.uri,
           dialogTitle: 'Simpan atau bagikan file'
         });
-      } else {        
+      } else {
         const response = await axios({
           url: `${link}/GetFile?url=${encodeURIComponent(url)}`,
           method: 'GET',
