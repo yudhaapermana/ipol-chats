@@ -13,6 +13,8 @@
   transition: none;
   overflow-y: auto;
   height: 100vh;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top);
 }
 
 /* =========================================
