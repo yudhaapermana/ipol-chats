@@ -1267,8 +1267,7 @@ const Chat = () => {
                     <div className="d-flex gap-3 align-items-center cursor-pointer pe-2" onClick={() => setIsProfile(true)}>
                       <Avatar
                         src={chat?.Image ? chat.Image : chat?.Title == 'System Admin' ? avatarAdmin : getCustomAvatar(chat.Title)}
-                        size={`${CheckDev.isMobile ? '2xl' : '3xl'}`}
-                        className="h-fit pb-2"
+                        size={`${CheckDev.isMobile ? '2xl' : '3xl'}`}                        
                       />
                       <div className="d-flex flex-column gap-1">
                         <h5 className="fw-bold fs-10 fs-md-9 m-0">{chat?.Title}</h5>
