@@ -14,8 +14,7 @@ const config: CapacitorConfig = {
   },
   server: {
     androidScheme: 'https',
-    // url: 'https://chat.indopoly.co.id',
-    cleartext: true
+    // url: 'https://chat.indopoly.co.id',    
   }
 };
 

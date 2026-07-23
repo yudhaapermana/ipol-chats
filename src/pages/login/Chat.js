@@ -60,7 +60,7 @@ const Chat = () => {
   const [previewIndex, setPreviewIndex] = useState(null);
   const [debugLogs, setDebugLogs] = useState([]);
   const [isDebug, setIsDebug] = useState(false);
-  
+
   const addLog = msg => {
     setDebugLogs(prev => [...prev, msg]);
   };
@@ -597,7 +597,7 @@ const Chat = () => {
           Keys: lgdata.UserTkn
         }
       })
-        .then(response => {})
+        .then(response => { })
         .catch(err => {
           ISI.PopAlertFalcon('error', 'error', err.response.data.Message, '');
         });
@@ -1070,29 +1070,71 @@ const Chat = () => {
     );
   }
 
-  const handleDownload = async (url, filename) => {
-    try {
-      const response = await axios({
-        url: `${link}/GetFile?url=${encodeURIComponent(url)}`,
-        method: 'GET',
-        responseType: 'blob',
-        headers: {
-          Keys: lgdata.UserTkn
-        }
-      });
-      const blob = new Blob([response.data], { type: response.headers['content-type'] });
-      const blobUrl = window.URL.createObjectURL(blob);
+  const arrayBufferToBase64 = (buffer) => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const chunkSize = 8192;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      const chunk = bytes.subarray(i, i + chunkSize);
+      binary += String.fromCharCode.apply(null, chunk);
+    }
+    return btoa(binary);
+  };
 
-      const lnk = document.createElement('a');
-      lnk.href = blobUrl;
-      lnk.setAttribute('download', filename || 'downloaded_file');
-      document.body.appendChild(lnk);
-      lnk.click();
-      document.body.removeChild(lnk);
-      window.URL.revokeObjectURL(blobUrl);
+
+  const handleDownload = async (url, filename) => {
+    const safeFilename = filename || `downloaded_file_${Date.now()}`;
+
+    try {
+      if (Capacitor.isNativePlatform()) {        
+        const response = await axios({
+          url: `${link}/GetFile?url=${encodeURIComponent(url)}`,
+          method: 'GET',
+          responseType: 'arraybuffer',
+          headers: { Keys: lgdata.UserTkn }
+        });
+
+        const base64Data = arrayBufferToBase64(response.data);
+
+        const savedFile = await Filesystem.writeFile({
+          path: safeFilename,
+          data: base64Data,
+          directory: Directory.Cache
+        });
+        
+        await Share.share({
+          title: safeFilename,
+          url: savedFile.uri,
+          dialogTitle: 'Simpan atau bagikan file'
+        });
+      } else {        
+        const response = await axios({
+          url: `${link}/GetFile?url=${encodeURIComponent(url)}`,
+          method: 'GET',
+          responseType: 'blob',
+          headers: { Keys: lgdata.UserTkn }
+        });
+
+        const blob = new Blob([response.data], {
+          type: response.headers['content-type']
+        });
+        const blobUrl = window.URL.createObjectURL(blob);
+
+        const lnk = document.createElement('a');
+        lnk.href = blobUrl;
+        lnk.setAttribute('download', safeFilename);
+        document.body.appendChild(lnk);
+        lnk.click();
+        document.body.removeChild(lnk);
+        window.URL.revokeObjectURL(blobUrl);
+      }
     } catch (err) {
       console.error('Download gagal:', err);
-      window.open(url, '_blank');
+      if (!Capacitor.isNativePlatform()) {
+        window.open(url, '_blank');
+      } else {
+        ISI.PopAlertFalcon('Warning', 'Warning', 'Gagal mengunduh file. Silakan coba lagi.', '');
+      }
     }
   };
 
@@ -1226,9 +1268,8 @@ const Chat = () => {
               <div id="chat-list" className="d-flex flex-column overflow-y-auto custom-scroll" style={{ height: self == top ? htab - 75 : htabe - 75 }}>
                 {filteredInbox?.map(i => (
                   <div
-                    className={`d-flex justify-content-between position-relative py-3 px-2 border-bottom border-300 custom-inbox cursor-pointer ${i?.RoomId == deleteRoomId && 'bg-400 rounded-3'} ${
-                      (i?.RoomId == activeRoomId || i?.RoomId == deleteRoomId) && 'bg-200 rounded-3'
-                    }`}
+                    className={`d-flex justify-content-between position-relative py-3 px-2 border-bottom border-300 custom-inbox cursor-pointer ${i?.RoomId == deleteRoomId && 'bg-400 rounded-3'} ${(i?.RoomId == activeRoomId || i?.RoomId == deleteRoomId) && 'bg-200 rounded-3'
+                      }`}
                     key={i?.RoomId}
                     onClick={() => handleOpenChat(1, i?.RoomId)}
                     onTouchStart={() => handleLongPressStart(i?.RoomId)}
@@ -1267,7 +1308,7 @@ const Chat = () => {
                     <div className="d-flex gap-3 align-items-center cursor-pointer pe-2" onClick={() => setIsProfile(true)}>
                       <Avatar
                         src={chat?.Image ? chat.Image : chat?.Title == 'System Admin' ? avatarAdmin : getCustomAvatar(chat.Title)}
-                        size={`${CheckDev.isMobile ? '2xl' : '3xl'}`}                        
+                        size={`${CheckDev.isMobile ? '2xl' : '3xl'}`}
                       />
                       <div className="d-flex flex-column gap-1">
                         <h5 className="fw-bold fs-10 fs-md-9 m-0">{chat?.Title}</h5>
