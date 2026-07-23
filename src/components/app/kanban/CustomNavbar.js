@@ -665,7 +665,7 @@ const CustomNavbar = ({ onHamburgerClick }) => {
         </Modal.Body>
       </Modal>
 
-      <Modal show={isECard} dialogClassName='w-fit' onHide={() => setIsECard(false)} centered>
+      <Modal show={isECard} dialogClassName='d-flex justify-content-center align-items-center' contentClassName='w-fit' onHide={() => setIsECard(false)} centered>
         <Modal.Body className='p-1 d-flex justify-content-center'>
           <Image
             height={qrsize}
