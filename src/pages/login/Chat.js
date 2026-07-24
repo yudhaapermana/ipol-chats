@@ -19,6 +19,8 @@ import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { formatText } from 'helpers/formatText';
 import { FCM } from '@capacitor-community/fcm';
+import { Directory, Filesystem } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 
 const Chat = () => {
   const navigate = useNavigate();
